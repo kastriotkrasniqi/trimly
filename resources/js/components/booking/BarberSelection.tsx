@@ -3,15 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Barber } from "@/types/booking";
-import { barbers } from "@/data/bookingData";
+// import { barbers } from "@/data/bookingData";
 
 interface BarberSelectionProps {
   selectedBarber?: Barber;
   onSelectBarber: (barber: Barber) => void;
   onNext: () => void;
+  employees: Barber[];
 }
 
-export function BarberSelection({ selectedBarber, onSelectBarber, onNext }: BarberSelectionProps) {
+export function BarberSelection({ selectedBarber, onSelectBarber, onNext, employees }: BarberSelectionProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -19,22 +20,24 @@ export function BarberSelection({ selectedBarber, onSelectBarber, onNext }: Barb
         <p className="text-muted-foreground mt-2">Select from our experienced professionals</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 ">
-        {barbers.map((barber) => (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 justify-center">
+        {employees.map((barber) => (
           <Card
             key={barber.id}
             className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-              selectedBarber?.id === barber.id
+              selectedBarber && selectedBarber.id == barber.id
                 ? "ring-2 ring-primary border-primary"
-                : "hover:border-primary/50"
+                : "border border-secondary/50 hover:border-primary/50"
             }`}
             onClick={() => onSelectBarber(barber)}
+            tabIndex={0}
+            aria-pressed={selectedBarber && selectedBarber.id == barber.id}
           >
             <CardContent className="p-4">
               <div className="flex flex-col items-center text-center space-y-3">
                 <div className="relative">
                   <img
-                    src={barber.image}
+                    src="https://gravatar.com/avatar/c85f10c0156f08daae803f7fc2af7d65?s=200&d=robohash&r=x"
                     alt={barber.name}
                     className="w-20 h-20 rounded-full object-cover"
                     onError={(e) => {
@@ -52,19 +55,17 @@ export function BarberSelection({ selectedBarber, onSelectBarber, onNext }: Barb
                   <h3 className="font-semibold text-foreground">{barber.name}</h3>
                   <div className="flex items-center justify-center mt-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm text-muted-foreground ml-1">{barber.rating}</span>
+                    {/* <span className="text-sm text-muted-foreground ml-1">{barber.rating}</span> */}
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-1 justify-center">
-                  {barber.specialties.slice(0, 2).map((specialty) => (
+                {/* <div className="flex flex-wrap gap-1 justify-center">
+                  {barber?.specialties.slice(0, 2).map((specialty) => (
                     <Badge key={specialty} variant="secondary" className="text-xs">
                       {specialty}
                     </Badge>
                   ))}
-                </div>
-
-                <p className="text-sm text-muted-foreground line-clamp-2">{barber.bio}</p>
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -72,8 +73,8 @@ export function BarberSelection({ selectedBarber, onSelectBarber, onNext }: Barb
       </div>
 
       <div className="flex justify-center">
-        <Button onClick={onNext} disabled={!selectedBarber} size="lg">
-          Continue to Services
+        <Button variant="outline" onClick={onNext} disabled={!selectedBarber} className="w-32">
+          Next Step
         </Button>
       </div>
     </div>

@@ -17,12 +17,6 @@ class ScheduleSeeder extends Seeder
                     'employee_id' => $employee->id,
                     'day_of_week' => $day,
                     'start_time' => '08:00:00',
-                    'end_time' => '12:00:00',
-                ]);
-                EmployeeSchedule::create([
-                    'employee_id' => $employee->id,
-                    'day_of_week' => $day,
-                    'start_time' => '13:00:00',
                     'end_time' => '17:00:00',
                 ]);
             }

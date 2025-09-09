@@ -1,10 +1,10 @@
 export interface Barber {
   id: string;
+  user_id: string;
   name: string;
-  image: string;
-  rating: number;
-  specialties: string[];
-  bio: string;
+  email: string;
+  phone: number;
+  services?: Service[];
 }
 
 export interface Service {

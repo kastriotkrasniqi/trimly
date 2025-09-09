@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             ScheduleSeeder::class,
             AppointmentSeeder::class,
+            EmployeeServiceSeeder::class, // Attach services to employees
         ]);
     }
 }

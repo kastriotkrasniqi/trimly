@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\EmployeeResource;
 use App\Models\Appointment;
 use App\Models\Employee;
 use App\Services\TimeSlotGenerator;
@@ -15,19 +16,9 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        $date = request('date', date('Y-m-d'));
-        $employee = Employee::first();
-        if (!$date) {
-            return response()->json(['error' => 'Date is required'], 422);
-        }
-        $generator = app(TimeSlotGenerator::class);
-        $slots = $generator->generate($employee, $date);
-        $employees = Employee::with('user')->get();
-        // dd($slots);
+        $employees = EmployeeResource::collection(Employee::with('user','services')->get());
         return Inertia::render('appointment', [
-            'slots' => $slots,
-            'employee' => $employee,
-            'members' => $employees,
+            'employees' => $employees
         ]);
     }
 

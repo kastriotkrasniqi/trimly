@@ -7,8 +7,8 @@ interface StepIndicatorProps {
 }
 
 const steps = [
-  { number: 1, title: "Choose Barber", description: "Select your preferred barber" },
-  { number: 2, title: "Select Services", description: "Pick your desired services" },
+  { number: 1, title: "Choose Barber", description: "Select your barber" },
+  { number: 2, title: "Select Services", description: "Pick your services" },
   { number: 3, title: "Book Time", description: "Choose date and time slot" }
 ];
 

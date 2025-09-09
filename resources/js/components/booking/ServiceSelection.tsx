@@ -1,23 +1,26 @@
-import { Clock, DollarSign, Check } from "lucide-react";
+import { Clock, DollarSign, Check, EuroIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Service } from "@/types/booking";
-import { services } from "@/data/bookingData";
+import { Barber, Service } from "@/types/booking";
 
 interface ServiceSelectionProps {
   selectedServices: Service[];
   onToggleService: (service: Service) => void;
   onNext: () => void;
   onBack: () => void;
+  employee: Barber
 }
 
-export function ServiceSelection({ selectedServices, onToggleService, onNext, onBack }: ServiceSelectionProps) {
+export function ServiceSelection({ selectedServices, onToggleService, onNext, onBack, employee }: ServiceSelectionProps) {
+  const availableServices = employee?.services || [];
   const totalDuration = selectedServices.reduce((sum, service) => sum + service.duration, 0);
   const totalPrice = selectedServices.reduce((sum, service) => sum + service.price, 0);
 
-  const isServiceSelected = (service: Service) =>
-    selectedServices.some(s => s.id === service.id);
+  const isServiceSelected = (service: Service) => {
+    // Defensive: check both id and type
+    return selectedServices.some(s => String(s.id) === String(service.id));
+  };
 
   return (
     <div className="space-y-6">
@@ -27,7 +30,7 @@ export function ServiceSelection({ selectedServices, onToggleService, onNext, on
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {services.map((service) => {
+        {availableServices.map((service) => {
           const isSelected = isServiceSelected(service);
           return (
             <Card
@@ -57,7 +60,7 @@ export function ServiceSelection({ selectedServices, onToggleService, onNext, on
                         <span className="text-sm text-muted-foreground">{service.duration} min</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <DollarSign className="w-4 h-4 text-muted-foreground" />
+                        <EuroIcon className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-foreground">{service.price}</span>
                       </div>
                     </div>
@@ -77,7 +80,7 @@ export function ServiceSelection({ selectedServices, onToggleService, onNext, on
               {selectedServices.map((service) => (
                 <div key={service.id} className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{service.name}</span>
-                  <span className="text-foreground">${service.price}</span>
+                  <span className="text-foreground">€{service.price}</span>
                 </div>
               ))}
             </div>
@@ -89,7 +92,7 @@ export function ServiceSelection({ selectedServices, onToggleService, onNext, on
                 </Badge>
               </div>
               <div className="font-semibold text-foreground">
-                Total: ${totalPrice}
+                Total: €{totalPrice}
               </div>
             </div>
           </CardContent>
@@ -100,8 +103,8 @@ export function ServiceSelection({ selectedServices, onToggleService, onNext, on
         <Button variant="outline" onClick={onBack}>
           Back to Barber
         </Button>
-        <Button onClick={onNext} disabled={selectedServices.length === 0}>
-          Continue to Time Selection
+        <Button onClick={onNext} disabled={selectedServices.length === 0} variant="outline">
+          Next Step
         </Button>
       </div>
     </div>

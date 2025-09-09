@@ -1,13 +1,11 @@
-import { useState } from "react";
-import { CalendarIcon, Clock } from "lucide-react";
-import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import { Clock } from "lucide-react";
 import { toast } from "sonner";
-import { TimeSlot, Service, Barber } from "@/types/booking";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AppointmentPicker } from "@/components/booking/AppoinmentPicker";
+import { Barber, Service, TimeSlot } from "@/types/booking";
 import { generateTimeSlots } from "@/data/bookingData";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +32,17 @@ export function TimeSlotSelection({
 }: TimeSlotSelectionProps) {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
 
+  useEffect(() => {
+    if (!selectedDate || !selectedBarber?.id) return;
+    fetch(`/api/employee/${selectedBarber.id}/slots?date=${selectedDate.toISOString().slice(0, 10)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.slots)) {
+          setTimeSlots(data.slots.map((time, idx) => ({ id: idx, time, available: true })));
+        }
+      });
+  }, [selectedDate, selectedBarber]);
+
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       onSelectDate(date);
@@ -54,7 +63,7 @@ export function TimeSlotSelection({
     onConfirmBooking();
     toast({
       title: "Booking Confirmed!",
-      description: `Your appointment with ${selectedBarber.name} on ${format(selectedDate, "PPP")} at ${selectedTimeSlot.time} has been booked.`,
+      description: `Your appointment with ${selectedBarber.name} on ${selectedDate.toLocaleDateString()} at ${selectedTimeSlot.time} has been booked.`,
     });
   };
 
@@ -95,66 +104,24 @@ export function TimeSlotSelection({
             </div>
             <div className="flex justify-between border-t pt-2">
               <span className="text-muted-foreground">Total Price:</span>
-              <span className="text-foreground font-semibold">${totalPrice}</span>
+              <span className="text-foreground font-semibold">€{totalPrice}</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <h3 className="font-semibold text-foreground mb-3">Select Date</h3>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !selectedDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
-                initialFocus
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div>
-          <h3 className="font-semibold text-foreground mb-3">Available Time Slots</h3>
-          {!selectedDate ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Please select a date first
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
-              {timeSlots.map((slot) => (
-                <Button
-                  key={slot.id}
-                  variant={selectedTimeSlot?.id === slot.id ? "default" : "outline"}
-                  size="sm"
-                  disabled={!slot.available}
-                  onClick={() => onSelectTimeSlot(slot)}
-                  className={cn(
-                    "text-sm",
-                    !slot.available && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  {slot.time}
-                </Button>
-              ))}
-            </div>
-          )}
+        <div className="col-span-full">
+          <AppointmentPicker
+            employee={selectedBarber}
+            date={selectedDate}
+            onSelectDate={onSelectDate}
+            time={selectedTimeSlot?.time || null}
+            onSelectTime={slot => {
+              const found = timeSlots.find(ts => ts.time === slot);
+              if (found) onSelectTimeSlot(found);
+            }}
+          />
         </div>
       </div>
 

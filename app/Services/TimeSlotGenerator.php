@@ -2,17 +2,10 @@
 
 namespace App\Services;
 
+use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
 use Carbon\Carbon;
 use Label84\HoursHelper\Facades\HoursHelper;
-
-namespace App\Services;
-
-use App\Models\Employee;
-
-use Carbon\Carbon;
-use Label84\HoursHelper\Facades\HoursHelper;
-
 
 class TimeSlotGenerator
 {
@@ -34,10 +27,13 @@ class TimeSlotGenerator
     {
         $carbonDate = Carbon::parse($date);
         $dayOfWeek = $carbonDate->dayOfWeek; // 0=Sunday
+
         $interval =  config('settings.slot_interval_minutes');
         $buffer =  config('settings.appointment_buffer_minutes');
 
+        // Get the schedule for the correct day of week
         $schedule = $employee->schedules()->where('day_of_week', $dayOfWeek)->first();
+
         if (!$schedule) {
             return [];
         }
@@ -79,6 +75,7 @@ class TimeSlotGenerator
                 $availableSlots[] = $slot;
             }
         }
+        sleep(1);
         return $availableSlots;
     }
 

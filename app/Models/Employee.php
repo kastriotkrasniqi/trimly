@@ -10,6 +10,11 @@ class Employee extends Model
     /** @use HasFactory<\Database\Factories\EmployeeFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'user_id',
+        'phone',
+    ];
+
     /**
      * Get the user that owns the employee.
      */
@@ -32,5 +37,11 @@ class Employee extends Model
     public function appointments()
     {
         return $this->hasMany(\App\Models\Appointment::class);
+    }
+
+
+     public function services()
+    {
+        return $this->belongsToMany(Service::class, 'employee_services');
     }
 }

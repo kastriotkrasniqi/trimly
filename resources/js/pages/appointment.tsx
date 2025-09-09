@@ -6,7 +6,7 @@ import { ServiceSelection } from "@/components/booking/ServiceSelection";
 import { TimeSlotSelection } from "@/components/booking/TimeSlotSelection";
 import { BookingStep, BookingData, Barber, Service, TimeSlot } from "@/types/booking";
 
-const Index = () => {
+export default function AppointmentPage({ employees }: { employees: Barber[] }) {
   const [currentStep, setCurrentStep] = useState<BookingStep>(1);
   const [bookingData, setBookingData] = useState<BookingData>({
     selectedServices: []
@@ -46,7 +46,6 @@ const Index = () => {
   };
 
   const handleConfirmBooking = () => {
-    // Reset to step 1 after booking
     setCurrentStep(1);
     setBookingData({ selectedServices: [] });
   };
@@ -65,17 +64,19 @@ const Index = () => {
         <StepIndicator currentStep={currentStep} />
 
         <div className="max-w-4xl mx-auto">
-          {currentStep === 1 && (
-            <BarberSelection
-              selectedBarber={bookingData.selectedBarber}
-              onSelectBarber={handleSelectBarber}
-              onNext={handleNext}
-            />
-          )}
+            {currentStep === 1 && (
+                <BarberSelection
+                selectedBarber={bookingData.selectedBarber}
+                onSelectBarber={handleSelectBarber}
+                onNext={handleNext}
+                employees={employees}
+                />
+            )}
 
           {currentStep === 2 && (
             <ServiceSelection
               selectedServices={bookingData.selectedServices}
+              employee={bookingData.selectedBarber}
               onToggleService={handleToggleService}
               onNext={handleNext}
               onBack={handleBack}
@@ -99,5 +100,3 @@ const Index = () => {
     </div>
   );
 };
-
-export default Index;
