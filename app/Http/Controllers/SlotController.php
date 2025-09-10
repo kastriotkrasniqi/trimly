@@ -16,8 +16,13 @@ class SlotController extends Controller
         }
         $employee = Employee::with('services')->find($employee_id);
 
+        $serviceDuration = (int) $request->input('duration', 0);
+        if ($serviceDuration <= 0) {
+            return response()->json(['error' => 'Service duration is required'], 422);
+        }
+
         $generator = app(TimeSlotGenerator::class);
-        $slots = $generator->generate($employee, $date);
+        $slots = $generator->generate($employee, $date, $serviceDuration);
         return response()->json([
             'slots' => $slots,
         ]);

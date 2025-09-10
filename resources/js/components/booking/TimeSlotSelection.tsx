@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AppointmentPicker } from "@/components/booking/AppoinmentPicker";
 import { Barber, Service, TimeSlot } from "@/types/booking";
-import { generateTimeSlots } from "@/data/bookingData";
 import { cn } from "@/lib/utils";
 
 interface TimeSlotSelectionProps {
@@ -33,14 +32,13 @@ export function TimeSlotSelection({
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
 
   useEffect(() => {
+    // If no selectedDate, set it to today by default
+    if (!selectedDate) {
+      onSelectDate(new Date());
+    }
+    // Remove direct fetch here, let AppointmentPicker handle fetching with duration
     if (!selectedDate || !selectedBarber?.id) return;
-    fetch(`/api/employee/${selectedBarber.id}/slots?date=${selectedDate.toISOString().slice(0, 10)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data.slots)) {
-          setTimeSlots(data.slots.map((time, idx) => ({ id: idx, time, available: true })));
-        }
-      });
+    setTimeSlots([]); // Optionally clear slots on date/barber change
   }, [selectedDate, selectedBarber]);
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -118,9 +116,10 @@ export function TimeSlotSelection({
             onSelectDate={onSelectDate}
             time={selectedTimeSlot?.time || null}
             onSelectTime={slot => {
-              const found = timeSlots.find(ts => ts.time === slot);
-              if (found) onSelectTimeSlot(found);
+              // Accept slot as "start - end" string, pass as timeSlot object for parent
+              onSelectTimeSlot({ id: slot, time: slot, available: true });
             }}
+            selectedServices={selectedServices}
           />
         </div>
       </div>
@@ -129,7 +128,7 @@ export function TimeSlotSelection({
         <Button variant="outline" onClick={onBack}>
           Back to Services
         </Button>
-        <Button onClick={handleConfirmBooking} disabled={!selectedDate || !selectedTimeSlot}>
+        <Button onClick={handleConfirmBooking} disabled={!selectedTimeSlot}>
           Confirm Booking
         </Button>
       </div>

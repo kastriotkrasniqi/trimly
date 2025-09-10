@@ -8,14 +8,15 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 // Accept slots and employee as props
 export type AppointmentPickerProps = {
   slots?: string[];
-  employee?: { id: string|number; name?: string; email?: string };
+  employee?: { id: string|number; name?: string; email?: string; services?: any[] };
   date?: Date;
   onSelectDate?: (date: Date) => void;
   time?: string | null;
   onSelectTime?: (time: string) => void;
+  selectedServices?: { duration: number }[];
 };
 
-export function AppointmentPicker({ slots, employee, date: propDate, onSelectDate, time: propTime, onSelectTime }: AppointmentPickerProps) {
+export function AppointmentPicker({ slots, employee, date: propDate, onSelectDate, time: propTime, onSelectTime, selectedServices }: AppointmentPickerProps) {
   const today = new Date();
   const [date, setDate] = useState<Date>(propDate || today);
   const [time, setTime] = useState<string | null>(propTime || null);
@@ -31,21 +32,42 @@ export function AppointmentPicker({ slots, employee, date: propDate, onSelectDat
   }, [propTime]);
 
   useEffect(() => {
-    if (slots) {
+    const abortController = new AbortController();
+    const fetchData = async () => {
+      setLoadingSlots(true);
+      try {
+        // Calculate total service duration
+        let serviceDuration = 0;
+        if (Array.isArray(employee?.services) && Array.isArray(selectedServices) && selectedServices.length > 0) {
+          serviceDuration = selectedServices.reduce((sum, s) => sum + (typeof s.duration === 'number' ? s.duration : 0), 0);
+        }
+        // Fallback to 0 if not provided
+        const durationParam = serviceDuration > 0 ? `&duration=${serviceDuration}` : '';
+        const response = await fetch(`/api/employee/${employee?.id}/slots?date=${date ? format(date, 'yyyy-MM-dd') : ''}${durationParam}`,
+          { signal: abortController.signal });
+        const data = await response.json();
+        setTimeSlots((data.slots || []).map((block: { start: string, end: string }) => ({ time: `${block.start} - ${block.end}`, available: true })));
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          // Request was aborted, do not update state
+        } else {
+          setTimeSlots([]);
+        }
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+
+    if (!slots && employee && date) {
+      fetchData();
+    } else if (slots) {
       setTimeSlots(slots.map(slot => ({ time: slot, available: true })));
       setLoadingSlots(false);
-      return;
     }
-    if (!employee || !date) return;
-    setLoadingSlots(true);
-    fetch(`/api/employee/${employee.id}/slots?date=${format(date, 'yyyy-MM-dd')}`)
-      .then(res => res.json())
-      .then(data => {
-        setTimeSlots((data.slots || []).map((slot: string) => ({ time: slot, available: true })));
-        setLoadingSlots(false);
-      })
-      .catch(() => setLoadingSlots(false));
-  }, [date]);
+    return () => {
+      abortController.abort();
+    };
+  }, [slots, employee, date, selectedServices]);
 
   // Only allow booking up to 1 week in advance
   const maxDate = addDays(today, 6);
@@ -59,7 +81,10 @@ export function AppointmentPicker({ slots, employee, date: propDate, onSelectDat
 
   const handleTimeClick = (slot: string) => {
     setTime(slot);
-    onSelectTime?.(slot);
+    if (onSelectTime) {
+      // Pass the slot string, not an object, to match parent expectations
+      onSelectTime(slot);
+    }
   };
 
   return (
@@ -97,9 +122,9 @@ export function AppointmentPicker({ slots, employee, date: propDate, onSelectDat
                       </div>
                     )}
                     {!loadingSlots && timeSlots.length === 0 && <span>No slots</span>}
-                    {!loadingSlots && timeSlots.map(({ time: timeSlot, available }) => (
+                    {!loadingSlots && timeSlots.map(({ time: timeSlot, available },idx) => (
                       <Button
-                        key={timeSlot}
+                        key={idx}
                         variant={time === timeSlot ? "default" : "outline"}
                         size="sm"
                         className="w-full"
