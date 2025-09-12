@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Ramsey\Uuid\Uuid;
 
 class Appointment extends Model
 {
     /** @use HasFactory<\Database\Factories\AppointmentFactory> */
-    use HasFactory;
+    use HasFactory,HasUuids;
 
 
     protected $fillable = [
         'client_id',
         'employee_id',
-        'date', 
+        'date',
         'start_time',
         'end_time',
         'price',
@@ -34,6 +36,20 @@ class Appointment extends Model
 
     public function services()
     {
-        return $this->belongsToMany(Service::class, 'appointment_service');
+        return $this->belongsToMany(Service::class, 'appointment_services');
     }
+
+    /**
+     * Generate a new UUID for the model.
+     */
+    public function newUniqueId(): string
+    {
+        $uuid = (string) Uuid::uuid4();
+
+        // Keep only the first 4 sections of the UUID (drop the last one)
+        return collect(explode('-', $uuid))
+            ->slice(0, 4)
+            ->implode('-');
+    }
+
 };

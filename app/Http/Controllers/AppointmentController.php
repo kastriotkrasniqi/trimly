@@ -35,6 +35,7 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
+        sleep(1);
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'employee_id' => 'required|exists:employees,id',
@@ -57,7 +58,7 @@ class AppointmentController extends Controller
 
         $appointment->services()->sync($validated['service_ids']);
 
-        return response()->json(['success' => true, 'appointment_id' => $appointment->id]);
+        return response()->json(data: ['success' => true, 'appointment_id' => $appointment->id]);
     }
 
     /**

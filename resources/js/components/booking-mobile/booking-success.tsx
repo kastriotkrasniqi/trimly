@@ -5,20 +5,21 @@ import { Card } from "@/components/ui/card"
 
 // Props for the booking success screen
 interface BookingSuccessProps {
+  bookingId: string | number;
   onNewBooking?: () => void
 }
 
-export default function BookingSuccess({ onNewBooking }: BookingSuccessProps) {
-  // Generate a random booking reference number
-  const bookingRef = `#BB2019-${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`
+export default function BookingSuccess({ bookingId, onNewBooking }: BookingSuccessProps) {
+  // Use the real booking ID as the reference
+  const bookingRef = `#${bookingId}`;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 py-8 max-w-md mx-auto">
         {/* Success Icon and message */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="h-10 w-10 text-green-600" />
+          <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check className="h-10 w-10 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-2">Booking Confirmed!</h1>
           <p className="text-muted-foreground">Your appointment has been successfully scheduled</p>

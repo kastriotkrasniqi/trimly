@@ -21,7 +21,7 @@ class EmployeeResource extends JsonResource
             'email' => $this->user->email,
             'phone' => $this->phone,
             'services' => ServiceResource::collection($this->whenLoaded('services')),
-            'image' => '/img/avatar.jpeg'
+            'image' => $this->avatar,
          ];
     }
 }

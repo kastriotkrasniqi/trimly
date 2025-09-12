@@ -13,6 +13,7 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
   const [currentStep, setCurrentStep] = useState<BookingStep>("barber")
   const [processingState, setProcessingState] = useState<"loading"|"success"|"error">("loading")
   const [bookingError, setBookingError] = useState<string>("")
+  const [bookingId, setBookingId] = useState<string | number | null>(null)
   const [direction, setDirection] = useState(1)
   // Persisted booking data
   const [selectedBarber, setSelectedBarber] = useState<string>("")
@@ -77,18 +78,18 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
       });
       if (!res.ok) {
         let errorText = await res.text();
-        // If the response is HTML, strip tags for a cleaner message
         if (/<[a-z][\s\S]*>/i.test(errorText)) {
           const doc = document.createElement('div');
           doc.innerHTML = errorText;
           errorText = doc.textContent || doc.innerText || "Failed to book appointment. Please try again.";
-          // Optionally, truncate long HTML error
           errorText = errorText.trim().split('\n').slice(0, 3).join(' ');
         }
         setProcessingState("error");
         setBookingError(errorText || "Failed to book appointment. Please try again.");
         return;
       }
+      const data = await res.json();
+      setBookingId(data.appointment_id);
       setProcessingState("success");
       setTimeout(() => {
         changeStep("success");
@@ -203,14 +204,20 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
               </>
             )}
             {processingState === "success" && (
-              <>
-                <div className="w-20 h-20 mb-6 rounded-full bg-green-500 flex items-center justify-center">
+              <motion.div
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 60, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                className="flex flex-col items-center"
+              >
+                <div className="w-20 h-20 mb-6 rounded-full bg-primary flex items-center justify-center">
                   <svg className="w-12 h-12" viewBox="0 0 24 24">
                     <path d="M5 13l4 4L19 7" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
-                <div className="text-xl font-semibold text-green-600">Success</div>
-              </>
+                <div className="text-xl font-semibold text-white">Success</div>
+              </motion.div>
             )}
             {processingState === "error" && (
               <>
@@ -285,7 +292,7 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
           />
         )
       case "success":
-        return <BookingSuccess onNewBooking={handleNewBooking} />
+  return <BookingSuccess bookingId={bookingId ?? ""} onNewBooking={handleNewBooking} />
       default:
         return null
     }
@@ -314,7 +321,7 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: 100, opacity: 0 }}
                   transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                  className="fixed left-1/2 bottom-6 z-50 -translate-x-1/2 px-6 py-3 bg-primary text-white rounded-2xl shadow-lg"
+                  className="sticky mt-2 left-1/2 bottom-6 z-50 -translate-x-1/2 px-6 py-3 bg-primary text-white rounded-2xl shadow-lg"
                   onClick={handleContinue}
                 >
                   {getContinueLabel()}

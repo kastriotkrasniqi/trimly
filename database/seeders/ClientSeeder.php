@@ -13,8 +13,8 @@ class ClientSeeder extends Seeder
         // Create 3 clients, each with a user
         for ($i = 1; $i <= 3; $i++) {
             $user = User::factory()->create([
-                'name' => "Client $i",
-                'email' => "client$i@example.com",
+                'name' => fake()->firstName().' '. fake()->lastName(),
+                'email' => fake()->unique()->safeEmail(),
             ]);
             Client::factory()->create([
                 'user_id' => $user->id,
