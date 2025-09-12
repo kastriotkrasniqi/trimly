@@ -36,8 +36,12 @@ class TimeSlotGenerator
             return [];
         }
 
-        $slotStartTime = Carbon::parse($date . ' ' . $schedule->start_time)->format('H:i');
-        $slotEndTime = Carbon::parse($date . ' ' . $schedule->end_time)->format('H:i');
+        // Ensure start_time and end_time are only times (not full datetimes)
+    $startTime = is_string($schedule->start_time) ? $schedule->start_time : ($schedule->start_time->format('H:i') ?? '09:00');
+    $endTime = is_string($schedule->end_time) ? $schedule->end_time : ($schedule->end_time->format('H:i') ?? '18:00');
+
+    $slotStartTime = Carbon::parse($date . ' ' . $startTime)->format('H:i');
+    $slotEndTime = Carbon::parse($date . ' ' . $endTime)->format('H:i');
 
         // Generate base slots
         $hours = HoursHelper::create($slotStartTime, $slotEndTime, $interval, 'H:i', []);
@@ -49,8 +53,10 @@ class TimeSlotGenerator
             : collect();
 
         // Add lunch break as a "virtual appointment"
-        $lunchStart = Carbon::parse($date . ' ' . config('settings.lunch_time_break.start'));
-        $lunchEnd = Carbon::parse($date . ' ' . config('settings.lunch_time_break.end'));
+        $lunchStartTime = config('settings.lunch_time_break.start');
+        $lunchEndTime = config('settings.lunch_time_break.end');
+        $lunchStart = Carbon::parse($date . ' ' . $lunchStartTime);
+        $lunchEnd = Carbon::parse($date . ' ' . $lunchEndTime);
 
         $appointments->push((object) [
             'start_time' => $lunchStart,
@@ -71,8 +77,13 @@ class TimeSlotGenerator
             // check overlap
             $overlap = false;
             foreach ($appointments as $appointment) {
-                $appStart = Carbon::parse($date . ' ' . $appointment->start_time);
-                $appEnd = Carbon::parse($date . ' ' . $appointment->end_time)->addMinutes($buffer);
+                // If appointment times are already Carbon instances, use as is; otherwise, parse
+                $appStart = $appointment->start_time instanceof \Carbon\Carbon
+                    ? $appointment->start_time
+                    : Carbon::parse($date . ' ' . $appointment->start_time);
+                $appEnd = $appointment->end_time instanceof \Carbon\Carbon
+                    ? $appointment->end_time->copy()->addMinutes($buffer)
+                    : Carbon::parse($date . ' ' . $appointment->end_time)->addMinutes($buffer);
 
                 if ($blockStart < $appEnd && $blockEnd > $appStart) {
                     $overlap = true;

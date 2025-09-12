@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SlotController;
+use App\Http\Resources\EmployeeResource;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Employee;
@@ -22,6 +24,13 @@ Route::get('/appointment',[AppointmentController::class,'index'])->name('appoint
 
 // Add route for getting slots from employee
 Route::get('/api/employee/{employee}/slots', action: [SlotController::class, 'getSlotsFromEmployee']);
+
+Route::get('/api/services/{employee_id}',[ServiceController::class,'getServicesByEmployee']);
+
+Route::get('/mobile-test',function (){
+    $employees = EmployeeResource::collection(Employee::with('services')->get());
+    return Inertia::render('mobile-appointment', ['employees' => $employees]);
+});
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

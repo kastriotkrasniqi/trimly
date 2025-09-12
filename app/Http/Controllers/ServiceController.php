@@ -62,4 +62,14 @@ class ServiceController extends Controller
     {
         //
     }
+
+
+    public function getServicesByEmployee($employee_id)
+    {
+        $services = Service::whereHas('employees', function ($query) use ($employee_id) {
+            $query->where('employee_id', $employee_id);
+        })->get();
+
+        return response()->json($services);
+    }
 }

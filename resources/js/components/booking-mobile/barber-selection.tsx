@@ -1,0 +1,96 @@
+import { useState, useEffect } from "react"
+import { X, Check } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Barber } from "@/types/booking"
+import { motion, AnimatePresence } from "framer-motion"
+
+interface BarberSelectionProps {
+  selectedBarber?: string
+  onBarberSelect?: (barberId: string) => void
+  onClose?: () => void
+    employees: Barber[]
+}
+
+export default function BarberSelection({
+  selectedBarber = "",
+  onBarberSelect,
+  onClose,
+    employees
+}: BarberSelectionProps) {
+  const [selected, setSelected] = useState<string>(selectedBarber)
+
+  // Sync local state with prop when coming back
+  useEffect(() => {
+    setSelected(selectedBarber)
+  }, [selectedBarber])
+
+  const handleBarberSelect = (barberId: string) => {
+    setSelected(barberId)
+    if (onBarberSelect) onBarberSelect(barberId)
+  }
+
+
+  return (
+    <div className="min-h-screen  bg-background">
+      {/* Header */}
+      <div className="sticky top-0 bg-background z-10">
+        <div className="flex items-center px-4 py-4 relative">
+          <h1 className="text-2xl font-semibold text-foreground">Choose a professional</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 bg-gray-100 rounded-full"
+            onClick={onClose}
+          >
+            <X className="h-8 w-8 text-gray-400" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="px-4 py-6 max-w-md mx-auto overflow-x-auto">
+        <div className="grid grid-cols-2 gap-4">
+          {employees.map((barber) => (
+            <Card
+              key={barber.id}
+              className={`cursor-pointer transition-colors ${
+                selected === barber.id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card border-border hover:bg-card/80"
+              }`}
+              onClick={() => handleBarberSelect(barber.id)}
+            >
+              <div className="p-2 text-center space-y-3">
+                <div className="flex justify-center">
+                  <img
+                    src={barber.image || "/placeholder.svg"}
+                    alt={barber.name}
+                    className="w-16 h-16 rounded-lg object-cover"
+                  />
+                </div>
+                <div>
+                  <h3
+                    className={`font-semibold text-base ${
+                      selected === barber.id ? "text-primary-foreground" : "text-card-foreground"
+                    }`}
+                  >
+                    {barber.name}
+                  </h3>
+                  <p
+                    className={`text-sm mt-1 ${
+                      selected === barber.id ? "text-primary-foreground/80" : "text-muted-foreground"
+                    }`}
+                  >
+                    Hair Stylist
+                  </p>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Continue button removed; handled by main template */}
+    </div>
+  )
+}
