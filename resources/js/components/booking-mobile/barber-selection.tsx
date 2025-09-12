@@ -1,23 +1,25 @@
+
 import { useState, useEffect } from "react"
-import { X, Check } from "lucide-react"
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Barber } from "@/types/booking"
-import { motion, AnimatePresence } from "framer-motion"
 
+// Props for the barber selection step
 interface BarberSelectionProps {
   selectedBarber?: string
   onBarberSelect?: (barberId: string) => void
   onClose?: () => void
-    employees: Barber[]
+  employees: Barber[]
 }
 
 export default function BarberSelection({
   selectedBarber = "",
   onBarberSelect,
   onClose,
-    employees
+  employees,
 }: BarberSelectionProps) {
+  // Local state for selected barber
   const [selected, setSelected] = useState<string>(selectedBarber)
 
   // Sync local state with prop when coming back
@@ -25,14 +27,14 @@ export default function BarberSelection({
     setSelected(selectedBarber)
   }, [selectedBarber])
 
+  // Handle barber selection
   const handleBarberSelect = (barberId: string) => {
     setSelected(barberId)
     if (onBarberSelect) onBarberSelect(barberId)
   }
 
-
   return (
-    <div className="min-h-screen  bg-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 bg-background z-10">
         <div className="flex items-center px-4 py-4 relative">
@@ -50,43 +52,46 @@ export default function BarberSelection({
 
       <div className="px-4 py-6 max-w-md mx-auto overflow-x-auto">
         <div className="grid grid-cols-2 gap-4">
-          {employees.map((barber) => (
-            <Card
-              key={barber.id}
-              className={`cursor-pointer transition-colors ${
-                selected === barber.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card border-border hover:bg-card/80"
-              }`}
-              onClick={() => handleBarberSelect(barber.id)}
-            >
-              <div className="p-2 text-center space-y-3">
-                <div className="flex justify-center">
-                  <img
-                    src={barber.image || "/placeholder.svg"}
-                    alt={barber.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
+          {employees.map((barber) => {
+            const isSelected = selected === barber.id
+            return (
+              <Card
+                key={barber.id}
+                className={`cursor-pointer transition-colors ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card border-border hover:bg-card/80"
+                }`}
+                onClick={() => handleBarberSelect(barber.id)}
+              >
+                <div className="p-2 text-center space-y-3">
+                  <div className="flex justify-center">
+                    <img
+                      src={barber.image || "/placeholder.svg"}
+                      alt={barber.name}
+                      className="w-16 h-16 rounded-lg object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h3
+                      className={`font-semibold text-base ${
+                        isSelected ? "text-primary-foreground" : "text-card-foreground"
+                      }`}
+                    >
+                      {barber.name}
+                    </h3>
+                    <p
+                      className={`text-sm mt-1 ${
+                        isSelected ? "text-primary-foreground/80" : "text-muted-foreground"
+                      }`}
+                    >
+                      Hair Stylist
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3
-                    className={`font-semibold text-base ${
-                      selected === barber.id ? "text-primary-foreground" : "text-card-foreground"
-                    }`}
-                  >
-                    {barber.name}
-                  </h3>
-                  <p
-                    className={`text-sm mt-1 ${
-                      selected === barber.id ? "text-primary-foreground/80" : "text-muted-foreground"
-                    }`}
-                  >
-                    Hair Stylist
-                  </p>
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            )
+          })}
         </div>
       </div>
 

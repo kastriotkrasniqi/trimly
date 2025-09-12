@@ -1,9 +1,9 @@
+
 import { ChevronLeft, Calendar, User, Scissors } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Barber, Service } from "@/types/booking"
 
-
+// Props for the booking confirmation summary
 interface BookingConfirmationProps {
   selectedServiceIds: string[]
   selectedTime: string
@@ -13,6 +13,7 @@ interface BookingConfirmationProps {
   onConfirm?: () => void
   employees?: any[] // passed from parent for lookup
 }
+
 export default function BookingConfirmation({
   selectedServiceIds,
   selectedTime,
@@ -22,35 +23,52 @@ export default function BookingConfirmation({
   onConfirm,
   employees = [],
 }: BookingConfirmationProps) {
-  // Find barber and services from employees prop
-  const barber = employees && Array.isArray(employees) ? employees.find(e => e.id === selectedBarber) : undefined;
-  const services = (barber && Array.isArray(barber.services))
-    ? barber.services.filter(s => Array.isArray(selectedServiceIds) && selectedServiceIds.includes(s.id))
-    : [];
+  // Lookup selected barber from employees
+  const barber = Array.isArray(employees)
+    ? employees.find(e => e.id === selectedBarber)
+    : undefined
 
-  // Date formatting
+  // Lookup selected services from barber
+  const services = barber && Array.isArray(barber.services)
+    ? barber.services.filter(s => Array.isArray(selectedServiceIds) && selectedServiceIds.includes(s.id))
+    : []
+
+  // Format the selected date for display
   let dateObj: Date
   if (selectedDate instanceof Date) {
     dateObj = selectedDate
-  } else if (typeof selectedDate === 'number') {
+  } else if (typeof selectedDate === "number") {
     dateObj = new Date(selectedDate)
   } else {
     dateObj = new Date()
   }
-  const formattedDate = dateObj.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+  const formattedDate = dateObj.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
 
+  // Handler for confirm booking (if needed in future)
   const handleConfirmBooking = () => {
-    if (onConfirm) {
-      onConfirm()
-    }
+    if (onConfirm) onConfirm()
   }
+
+  // Calculate total duration and price
+  const totalDuration = services.reduce((acc, s) => acc + (parseInt(s.duration) || 0), 0)
+  const totalPrice = services.reduce((acc, s) => acc + (s.price || 0), 0)
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile App Header - match other steps */}
+      {/* Header */}
       <div className="sticky top-0 bg-background z-10">
         <div className="flex items-center justify-center px-4 py-4 relative">
-          <Button variant="ghost" size="icon" className="absolute left-4 bg-gray-100 rounded-full" onClick={onBack}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-4 bg-gray-100 rounded-full"
+            onClick={onBack}
+          >
             <ChevronLeft className="h-8 w-8" />
           </Button>
           <h1 className="text-2xl font-semibold text-foreground">Booking Summary</h1>
@@ -58,7 +76,7 @@ export default function BookingConfirmation({
       </div>
 
       <div className="px-4 py-6 max-w-md mx-auto space-y-6">
-        {/* Date & Time FIRST */}
+        {/* Date & Time */}
         <Card className="bg-card border border-border mb-4 shadow-sm">
           <div className="p-4">
             <div className="flex items-start space-x-3">
@@ -74,7 +92,7 @@ export default function BookingConfirmation({
           </div>
         </Card>
 
-        {/* Barber SECOND */}
+        {/* Barber */}
         <Card className="bg-card border border-border mb-4 shadow-sm">
           <div className="p-4">
             <div className="flex items-start space-x-3">
@@ -93,15 +111,13 @@ export default function BookingConfirmation({
                 <h3 className="font-semibold text-card-foreground text-base mb-1">
                   {selectedBarber === "any" ? "Any Professional" : barber?.name}
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                  Hair Stylist
-                </p>
+                <p className="text-sm text-muted-foreground">Hair Stylist</p>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Services THIRD */}
+        {/* Services */}
         {services.length > 0 && (
           <Card className="bg-card border border-border mb-4 shadow-sm">
             <div className="p-4 py-2">
@@ -127,15 +143,15 @@ export default function BookingConfirmation({
         )}
 
         {/* Total Summary */}
-        <Card className=" shadow-md">
+        <Card className="shadow-md">
           <div className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold">Total</h3>
-                <p className="text-sm opacity-90">{services.reduce((acc, s) => acc + (parseInt(s.duration) || 0), 0)} min appointment</p>
+                <p className="text-sm opacity-90">{totalDuration} min appointment</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold">€{services.reduce((acc, s) => acc + (s.price || 0), 0)}</p>
+                <p className="text-2xl font-bold">€{totalPrice}</p>
               </div>
             </div>
           </div>

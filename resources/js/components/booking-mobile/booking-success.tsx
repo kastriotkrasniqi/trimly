@@ -1,16 +1,21 @@
+
 import { Check, Calendar, Clock, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 
+// Props for the booking success screen
 interface BookingSuccessProps {
   onNewBooking?: () => void
 }
 
 export default function BookingSuccess({ onNewBooking }: BookingSuccessProps) {
+  // Generate a random booking reference number
+  const bookingRef = `#BB2019-${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`
+
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 py-8 max-w-md mx-auto">
-        {/* Success Icon */}
+        {/* Success Icon and message */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="h-10 w-10 text-green-600" />
@@ -23,12 +28,7 @@ export default function BookingSuccess({ onNewBooking }: BookingSuccessProps) {
         <Card className="bg-card border-border mb-6">
           <div className="p-4 text-center">
             <h3 className="font-semibold text-card-foreground mb-2">Booking Reference</h3>
-            <p className="text-2xl font-mono font-bold text-primary">
-              #BB2019-
-              {Math.floor(Math.random() * 1000)
-                .toString()
-                .padStart(3, "0")}
-            </p>
+            <p className="text-2xl font-mono font-bold text-primary">{bookingRef}</p>
           </div>
         </Card>
 
@@ -61,7 +61,10 @@ export default function BookingSuccess({ onNewBooking }: BookingSuccessProps) {
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          <Button className="w-full h-12 bg-primary text-primary-foreground font-semibold" onClick={onNewBooking}>
+          <Button
+            className="w-full h-12 bg-primary text-primary-foreground font-semibold"
+            onClick={onNewBooking}
+          >
             Book Another Appointment
           </Button>
           <Button variant="outline" className="w-full h-12 bg-transparent">
