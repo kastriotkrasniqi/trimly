@@ -35,7 +35,29 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'employee_id' => 'required|exists:employees,id',
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'price' => 'nullable|integer',
+            'service_ids' => 'required|array',
+            'service_ids.*' => 'exists:services,id',
+        ]);
+
+        $appointment = Appointment::create([
+            'client_id' => $validated['client_id'],
+            'employee_id' => $validated['employee_id'],
+            'date' => $validated['date'],
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'price' => $validated['price'] ?? null,
+        ]);
+
+        $appointment->services()->sync($validated['service_ids']);
+
+        return response()->json(['success' => true, 'appointment_id' => $appointment->id]);
     }
 
     /**

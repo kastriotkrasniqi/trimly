@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('/appointment',[AppointmentController::class,'index'])->name('appointment.index');
+Route::post('/api/appointments', [AppointmentController::class, 'store']);
 
 // Add route for getting slots from employee
 Route::get('/api/employee/{employee}/slots', action: [SlotController::class, 'getSlotsFromEmployee']);

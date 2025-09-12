@@ -11,7 +11,8 @@ type BookingStep = "barber" | "service" | "time" | "confirmation" | "processing"
 
 export default function BookingApp({ employees }: { employees: Barber[] }) {
   const [currentStep, setCurrentStep] = useState<BookingStep>("barber")
-  const [processingState, setProcessingState] = useState<"loading"|"success">("loading")
+  const [processingState, setProcessingState] = useState<"loading"|"success"|"error">("loading")
+  const [bookingError, setBookingError] = useState<string>("")
   const [direction, setDirection] = useState(1)
   // Persisted booking data
   const [selectedBarber, setSelectedBarber] = useState<string>("")
@@ -37,15 +38,65 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
     setSelectedTime(time)
     setSelectedDate(date)
   }
-  const handleConfirmBooking = () => {
-    changeStep("processing");
-    setProcessingState("loading");
-    setTimeout(() => {
+  // Simulate getting the client_id (replace with real auth/user context in production)
+  const clientId = 1;
+
+  // POST appointment to backend
+  const handleConfirmBooking = async () => {
+  changeStep("processing");
+  setProcessingState("loading");
+  setBookingError("");
+    try {
+      // Find selected barber and service details
+      const barber = employees.find(e => e.id === selectedBarber);
+      const serviceObjs = barber && barber.services ? barber.services.filter(s => selectedServices.includes(s.id)) : [];
+      // Calculate end time based on duration
+      const startDate = new Date(selectedDate);
+      const [startHour, startMinute] = selectedTime.split(":").map(Number);
+      startDate.setHours(startHour, startMinute, 0, 0);
+      const totalDuration = serviceObjs.reduce((acc, s) => acc + (parseInt(s.duration) || 0), 0);
+      const endDate = new Date(startDate.getTime() + totalDuration * 60000);
+      const pad = (n) => n.toString().padStart(2, "0");
+      const payload = {
+        client_id: clientId,
+        employee_id: selectedBarber,
+        date: startDate.toISOString().slice(0, 10),
+        start_time: `${pad(startDate.getHours())}:${pad(startDate.getMinutes())}:00`,
+        end_time: `${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:00`,
+        price: serviceObjs.reduce((acc, s) => acc + (s.price || 0), 0),
+        service_ids: selectedServices,
+      };
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": csrfToken
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        let errorText = await res.text();
+        // If the response is HTML, strip tags for a cleaner message
+        if (/<[a-z][\s\S]*>/i.test(errorText)) {
+          const doc = document.createElement('div');
+          doc.innerHTML = errorText;
+          errorText = doc.textContent || doc.innerText || "Failed to book appointment. Please try again.";
+          // Optionally, truncate long HTML error
+          errorText = errorText.trim().split('\n').slice(0, 3).join(' ');
+        }
+        setProcessingState("error");
+        setBookingError(errorText || "Failed to book appointment. Please try again.");
+        return;
+      }
       setProcessingState("success");
       setTimeout(() => {
         changeStep("success");
       }, 900);
-    }, 1200);
+    } catch (e) {
+      setProcessingState("error");
+      setBookingError("Failed to book appointment. Please try again.");
+    }
   }
   const handleNewBooking = () => {
     setSelectedBarber("")
@@ -127,7 +178,7 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
       case "processing":
         return (
           <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-            {processingState === "loading" ? (
+            {processingState === "loading" && (
               <>
                 <div className="relative w-20 h-20 mb-6">
                   <svg className="w-full h-full" viewBox="0 0 48 48">
@@ -150,7 +201,8 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
                 </div>
                 <div className="text-xl font-semibold text-foreground">Processing</div>
               </>
-            ) : (
+            )}
+            {processingState === "success" && (
               <>
                 <div className="w-20 h-20 mb-6 rounded-full bg-green-500 flex items-center justify-center">
                   <svg className="w-12 h-12" viewBox="0 0 24 24">
@@ -158,6 +210,23 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
                   </svg>
                 </div>
                 <div className="text-xl font-semibold text-green-600">Success</div>
+              </>
+            )}
+            {processingState === "error" && (
+              <>
+                <div className="w-20 h-20 mb-6 rounded-full bg-red-500 flex items-center justify-center">
+                  <svg className="w-12 h-12" viewBox="0 0 24 24">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div className="text-xl font-semibold text-red-600 mb-2">Booking Failed</div>
+                <div className="text-base text-red-500 mb-4 max-w-xs text-center">{bookingError}</div>
+                <button
+                  className="px-6 py-2 bg-primary text-white rounded-xl shadow"
+                  onClick={() => changeStep("confirmation")}
+                >
+                  Try Again
+                </button>
               </>
             )}
           </div>

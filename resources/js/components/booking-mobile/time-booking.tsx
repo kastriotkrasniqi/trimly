@@ -45,13 +45,7 @@ export default function TimeBooking({
         setSelectedTime(initialTime)
     }, [initialDate, initialTime])
 
-    // Reset selected time when date changes
-    useEffect(() => {
-        setSelectedTime("")
-        if (onTimeSelect) {
-            onTimeSelect("", selectedDate)
-        }
-    }, [selectedDate])
+
 
     // Fetch available time slots when barber/date/duration changes
     useEffect(() => {
@@ -107,7 +101,13 @@ export default function TimeBooking({
                 <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={setSelectedDate}
+                    onSelect={(date) => {
+                        setSelectedDate(date);
+                        setSelectedTime("");
+                        if (onTimeSelect) {
+                            onTimeSelect("", date);
+                        }
+                    }}
                     className="rounded-md border p-2 w-full"
                     classNames={{
                         caption_label: "text-base md:text-lg",
@@ -151,7 +151,7 @@ export default function TimeBooking({
                                     variant={selectedTime === slot.start ? "default" : "outline"}
                                     className={`h-12 rounded-2xl text-md ${selectedTime === slot.start
                                         ? "bg-primary text-primary-foreground"
-                                        : "text-secondary-foreground border-border hover:bg-secondary/80"
+                                        : "text-secondary border-border hover:bg-secondary/80"
                                     }`}
                                     onClick={() => handleTimeSelect(slot.start)}
                                 >

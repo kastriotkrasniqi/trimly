@@ -101,8 +101,8 @@
                                     <Button
                                         variant={isSelected ? "default" : "outline"}
                                         onClick={() => handleServiceToggle(service.id)}
-                                        className={`ml-4 rounded-xl px-6 py-5 font-semibold text-base tracking-wide transition ${
-                                            isSelected ? "bg-black text-white" : "border text-foreground"
+                                        className={`ml-4 rounded-xl px-6 py-5 text-primary font-semibold text-base tracking-wide transition border border-muted ${
+                                            isSelected ? "bg-primary text-white" : "border text-foreground"
                                         }`}
                                     >
                                         €{service.price}
