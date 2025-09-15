@@ -5,91 +5,81 @@ namespace App\Http\Controllers;
 use App\Http\Resources\EmployeeResource;
 use App\Models\Appointment;
 use App\Models\Employee;
+use App\Models\Service;
 use App\Services\TimeSlotGenerator;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Zap\Facades\Zap;
 
 class AppointmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        $employees = EmployeeResource::collection(Employee::with('user','services')->get());
-        return Inertia::render('appointment', [
-            'employees' => $employees
-        ]);
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        sleep(1);
-        $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
+        $request->validate([
+            'client_id' => 'required|exists:users,id',
             'employee_id' => 'required|exists:employees,id',
-            'date' => 'required|date',
-            'start_time' => 'required',
-            'end_time' => 'required',
-            'price' => 'nullable|integer',
-            'service_ids' => 'required|array',
+            'service_ids' => 'required|array|min:1',
             'service_ids.*' => 'exists:services,id',
+            'date' => 'required|date|after_or_equal:today',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i',
+            'price' => 'required|numeric|min:0',
         ]);
 
-        $appointment = Appointment::create([
-            'client_id' => $validated['client_id'],
-            'employee_id' => $validated['employee_id'],
-            'date' => $validated['date'],
-            'start_time' => $validated['start_time'],
-            'end_time' => $validated['end_time'],
-            'price' => $validated['price'] ?? null,
-        ]);
+        $employee = Employee::find($request->employee_id);
 
-        $appointment->services()->sync($validated['service_ids']);
+        try {
+            $services = Service::whereIn('id', $request->service_ids)->pluck('name')->toArray();
 
-        return response()->json(data: ['success' => true, 'appointment_id' => $appointment->id]);
+            $appointment = Zap::for($employee)
+                ->named('Appointment')
+                ->appointment()
+                ->from($request->date)
+                ->addPeriod($request->start_time, $request->end_time)
+                ->withMetadata([
+                    'client_id' => $request->client_id,
+                    'service_ids' => $request->service_ids,
+                    'service_names' => $services,
+                    'price' => $request->price,
+                    'status' => 'confirmed'
+                ])->save();
+
+            return response()->json([
+                'message' => 'Appointment booked successfully',
+                'appointment' => $appointment
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Appointment $appointment)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Appointment $appointment)
+    public function getEmployeeSchedule(Employee $employee, $date)
     {
-        //
-    }
+        $appointments = $employee->appointmentSchedules()
+            ->forDate($date)
+            ->with('periods')
+            ->get()
+            ->map(function ($schedule) {
+                return [
+                    'id' => $schedule->id,
+                    'name' => $schedule->name,
+                    'client_id' => $schedule->metadata['client_id'] ?? null,
+                    'service_name' => $schedule->metadata['service_name'] ?? null,
+                    'status' => $schedule->metadata['status'] ?? 'confirmed',
+                    'periods' => $schedule->periods->map(function ($period) {
+                        return [
+                            'start_time' => $period->start_time,
+                            'end_time' => $period->end_time
+                        ];
+                    })
+                ];
+            });
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Appointment $appointment)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Appointment $appointment)
-    {
-        //
+        return response()->json($appointments);
     }
 }

@@ -62,13 +62,13 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
         client_id: clientId,
         employee_id: selectedBarber,
         date: startDate.toISOString().slice(0, 10),
-        start_time: `${pad(startDate.getHours())}:${pad(startDate.getMinutes())}:00`,
-        end_time: `${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:00`,
+        start_time: `${pad(startDate.getHours())}:${pad(startDate.getMinutes())}`,
+        end_time: `${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`,
         price: serviceObjs.reduce((acc, s) => acc + (s.price || 0), 0),
         service_ids: selectedServices,
       };
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-      const res = await fetch("/api/appointments", {
+      const res = await fetch("/appointments/book-appointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

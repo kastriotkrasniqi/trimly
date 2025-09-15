@@ -12,15 +12,15 @@ class EmployeeSeeder extends Seeder
     {
         for ($i = 1; $i <= 3; $i++) {
             $user = User::factory()->create([
-                'name' => fake()->firstName().' '. fake()->lastName(),
                 'email' => fake()->unique()->safeEmail(),
-
             ]);
             Employee::factory()->create([
                 'user_id' => $user->id,
+                'first_name' => fake()->firstName(),
+                'last_name' => fake()->lastName(),
                 'phone' => fake()->phoneNumber(),
                 'avatar' => 'https://i.pravatar.cc/150?img=' . rand(1, 70),
-                'specialty' => fake()->jobTitle(),
+                'specialties' => [fake()->jobTitle()],
             ]);
         }
     }

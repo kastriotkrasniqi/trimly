@@ -5,12 +5,13 @@ import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { format, addDays } from "date-fns"
+import { time } from "console"
 
 // Type for a single time slot
 interface TimeSlot {
-    start: string
-    end: string
-    available?: boolean
+    start_time: string
+    end_time: string
+    is_available?: boolean
 }
 
 interface TimeBookingProps {
@@ -47,6 +48,7 @@ export default function TimeBooking({
 
 
 
+
     // Fetch available time slots when barber/date/duration changes
     useEffect(() => {
         if (!selectedBarber || !selectedDate) {
@@ -55,11 +57,11 @@ export default function TimeBooking({
         }
         setLoading(true)
         const dateStr = format(selectedDate, "yyyy-MM-dd")
-        const url = `/api/employee/${selectedBarber}/slots?date=${dateStr}&duration=${serviceDuration}`
+        const url = `/employees/${selectedBarber}/available-slots?date=${dateStr}&duration=${serviceDuration}`
         fetch(url)
             .then(res => res.json())
             .then(data => {
-                setTimeSlots(Array.isArray(data.slots) ? data.slots : [])
+                setTimeSlots(Object.values(data.available_slots) ? Object.values(data.available_slots) : [])
             })
             .catch(() => setTimeSlots([]))
             .finally(() => setLoading(false))
@@ -145,17 +147,17 @@ export default function TimeBooking({
                             <span className="col-span-3 text-center text-muted-foreground">No slots available</span>
                         ) : (
                             // Render available slots
-                            timeSlots.map((slot) => (
+                            timeSlots.map((slot,i) => (
                                 <Button
-                                    key={slot.start + '-' + slot.end}
-                                    variant={selectedTime === slot.start ? "default" : "outline"}
-                                    className={`h-12 rounded-2xl text-md ${selectedTime === slot.start
+                                    key={i}
+                                    variant={selectedTime === slot.start_time ? "default" : "outline"}
+                                    className={`h-12 rounded-2xl text-md  ${selectedTime === slot.start_time
                                         ? "bg-primary text-primary-foreground"
-                                        : "text-secondary border-border hover:bg-secondary/80"
+                                        : "text-secondary border-border hover:bg-secondary/80 hover:text-white"
                                     }`}
-                                    onClick={() => handleTimeSelect(slot.start)}
+                                    onClick={() => handleTimeSelect(slot.start_time || "")}
                                 >
-                                    {slot.start}
+                                    {slot.start_time}
                                 </Button>
                             ))
                         )}

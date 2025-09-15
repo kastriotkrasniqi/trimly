@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('first_name');
+            $table->string('last_name');
             $table->string('phone')->unique()->nullable();
             $table->string('avatar')->nullable();
-            $table->string('specialty')->nullable();
+            $table->json('specialties')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

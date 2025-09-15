@@ -10,16 +10,38 @@ class ScheduleSeeder extends Seeder
 {
     public function run(): void
     {
-        // For each employee, add a 08:00-12:00 and 13:00-17:00 schedule for Mon-Fri
-        foreach (Employee::all() as $employee) {
-            for ($day = 1; $day <= 5; $day++) { // 1=Monday, 5=Friday
-                EmployeeSchedule::create([
-                    'employee_id' => $employee->id,
-                    'day_of_week' => $day,
-                    'start_time' => '08:00:00',
-                    'end_time' => '17:00:00',
-                ]);
-            }
-        }
+        $employee = Employee::find(1);
+
+        $weeklySchedule = [
+            'monday' => [
+                ['start' => '09:00', 'end' => '18:00']
+            ],
+            'tuesday' => [
+                ['start' => '09:00', 'end' => '17:00']
+            ],
+            'wednesday' => [
+                ['start' => '10:00', 'end' => '19:00']
+            ],
+            'thursday' => [
+                ['start' => '09:00', 'end' => '18:00']
+            ],
+            'friday' => [
+                ['start' => '09:00', 'end' => '17:00']
+            ],
+            'saturday' => [
+                ['start' => '09:00', 'end' => '15:00']
+            ],
+            'sunday' => [
+            ]
+        ];
+
+        // Single lunch break that applies to all working days
+        $lunchBreak = [
+            'start' => '12:30',
+            'end' => '13:30'
+        ];
+        $service = app(\App\Services\WeeklyScheduleService::class);
+        $service->setWeeklyAvailability($employee, $weeklySchedule, $lunchBreak);
+
     }
 }
