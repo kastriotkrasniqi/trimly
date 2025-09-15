@@ -41,6 +41,9 @@ Route::get('/employees/{employee}/available-slots', [SlotController::class, 'get
 Route::post('/appointments/book-appointment', [AppointmentController::class, 'store']);
 
 
+Route::resource('employees', \App\Http\Controllers\EmployeeController::class);
+
+
 
 
 

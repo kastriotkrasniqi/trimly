@@ -21,12 +21,12 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            // EmployeeSeeder::class,
+            EmployeeSeeder::class,
             // ClientSeeder::class,
             // ServiceSeeder::class,
             // ScheduleSeeder::class,
             // AppointmentSeeder::class,
-            EmployeeServiceSeeder::class, // Attach services to employees
+            // EmployeeServiceSeeder::class, // Attach services to employees
         ]);
     }
 }

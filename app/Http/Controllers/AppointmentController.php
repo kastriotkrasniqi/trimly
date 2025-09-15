@@ -16,6 +16,7 @@ class AppointmentController extends Controller
 
     public function store(Request $request)
     {
+        sleep(1);
         $request->validate([
             'client_id' => 'required|exists:users,id',
             'employee_id' => 'required|exists:employees,id',

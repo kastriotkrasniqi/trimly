@@ -5,8 +5,9 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, User, Users, Users2, Users2Icon } from 'lucide-react';
 import AppLogo from './app-logo';
+import { index as employeeIndex } from '@/actions/App/Http/Controllers/EmployeeController'
 
 const mainNavItems: NavItem[] = [
     {
@@ -14,6 +15,12 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Employees',
+        href: employeeIndex.url(),
+        icon: Users2,
+    }
+
 ];
 
 const footerNavItems: NavItem[] = [
