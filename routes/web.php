@@ -43,6 +43,8 @@ Route::post('/appointments/book-appointment', [AppointmentController::class, 'st
 
 Route::resource('employees', \App\Http\Controllers\EmployeeController::class);
 
+Route::get('/employee/schedule', [\App\Http\Controllers\ScheduleController::class, 'index'])->name('schedule.index');
+Route::post('/employees/{employee}/schedule', [\App\Http\Controllers\ScheduleController::class, 'store'])->name('schedule.store');
 
 
 

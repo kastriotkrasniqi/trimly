@@ -5,9 +5,10 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, User, Users, Users2, Users2Icon } from 'lucide-react';
+import { BookOpen, CalendarClock, Folder, LayoutGrid, User, Users, Users2, Users2Icon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { index as employeeIndex } from '@/actions/App/Http/Controllers/EmployeeController'
+import { index as scheduleIndex } from '@/actions/App/Http/Controllers/ScheduleController'
 
 const mainNavItems: NavItem[] = [
     {
@@ -19,6 +20,11 @@ const mainNavItems: NavItem[] = [
         title: 'Employees',
         href: employeeIndex.url(),
         icon: Users2,
+    },
+    {
+        title: 'My Schedules',
+        href: scheduleIndex.url(),
+        icon: CalendarClock,
     }
 
 ];
