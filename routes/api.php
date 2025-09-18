@@ -11,3 +11,6 @@ Route::get('/user', function (Request $request) {
 
 //employees
 Route::get('/employees', [EmployeeController::class, 'index'])->name('api.employees.index');
+
+//appointments
+Route::get('/appointments', [\App\Http\Controllers\API\AppointmentController::class, 'index'])->name('api.appointments.index');

@@ -40,3 +40,24 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+
+interface DaySchedule {
+  enabled: boolean
+  startTime: string
+  endTime: string
+}
+
+interface WeeklyScheduleData {
+  monday: DaySchedule
+  tuesday: DaySchedule
+  wednesday: DaySchedule
+  thursday: DaySchedule
+  friday: DaySchedule
+  saturday: DaySchedule
+  sunday: DaySchedule
+  lunchBreak: {
+    start: string
+    end: string
+  }
+}

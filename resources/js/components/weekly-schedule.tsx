@@ -8,26 +8,7 @@ import { Clock, Save, RotateCcw } from "lucide-react"
 import { useForm } from '@inertiajs/react'
 import { toast } from "sonner";
 import { store } from '@/actions/App/Http/Controllers/ScheduleController';
-
-interface DaySchedule {
-  enabled: boolean
-  startTime: string
-  endTime: string
-}
-
-interface WeeklyScheduleData {
-  monday: DaySchedule
-  tuesday: DaySchedule
-  wednesday: DaySchedule
-  thursday: DaySchedule
-  friday: DaySchedule
-  saturday: DaySchedule
-  sunday: DaySchedule
-  lunchBreak: {
-    start: string
-    end: string
-  }
-}
+import { DaySchedule,WeeklyScheduleData } from "@/types"
 
 const DAYS = [
   { key: "monday", label: "Monday" },
@@ -176,7 +157,6 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
     )
   }
 
-  // Track validation errors for display after submit
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -212,7 +192,6 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
       return
     }
 
-    // Submit form
     post(store.url(1), {
       onSuccess: () => {
         toast.success("Schedule Saved", {

@@ -21,8 +21,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            EmployeeSeeder::class,
-            // ClientSeeder::class,
+            // EmployeeSeeder::class,
+            ClientSeeder::class,
             // ServiceSeeder::class,
             // ScheduleSeeder::class,
             // AppointmentSeeder::class,

@@ -22,7 +22,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/schedule/create', [\App\Http\Controllers\ScheduleController::class, 'create'])->name('schedule.create');
 
-Route::get('/appointment', [AppointmentController::class, 'index'])->name('appointment.index');
 Route::post('/api/appointments', [AppointmentController::class, 'store']);
 
 // Add route for getting slots from employee
@@ -39,6 +38,7 @@ Route::get('/mobile-test', function () {
 
 Route::get('/employees/{employee}/available-slots', [SlotController::class, 'getAvailableSlots']);
 Route::post('/appointments/book-appointment', [AppointmentController::class, 'store']);
+Route::get('/my-appointments', [AppointmentController::class, 'index'])->name('my-appointments');
 
 
 Route::resource('employees', \App\Http\Controllers\EmployeeController::class);

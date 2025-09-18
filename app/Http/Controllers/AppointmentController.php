@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\EmployeeResource;
-use App\Models\Appointment;
+use App\Http\Resources\AppointmentResource;
+use App\Models\Client;
 use App\Models\Employee;
 use App\Models\Service;
-use App\Services\TimeSlotGenerator;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Zap\Facades\Zap;
 
 class AppointmentController extends Controller
 {
+
+    public function index()
+    {
+        return Inertia::render('my-appointments');
+    }
 
     public function store(Request $request)
     {
@@ -39,9 +43,8 @@ class AppointmentController extends Controller
                 ->from($request->date)
                 ->addPeriod($request->start_time, $request->end_time)
                 ->withMetadata([
-                    'client_id' => $request->client_id,
-                    'service_ids' => $request->service_ids,
-                    'service_names' => $services,
+                    'client' => [Client::find($request->client_id)->only('id', 'first_name', 'last_name', 'email', 'phone')],
+                    'services' => Service::whereIn('id', $request->service_ids)->get(['id', 'name', 'duration', 'price']),
                     'price' => $request->price,
                     'status' => 'confirmed'
                 ])->save();
@@ -59,28 +62,5 @@ class AppointmentController extends Controller
     }
 
 
-    public function getEmployeeSchedule(Employee $employee, $date)
-    {
-        $appointments = $employee->appointmentSchedules()
-            ->forDate($date)
-            ->with('periods')
-            ->get()
-            ->map(function ($schedule) {
-                return [
-                    'id' => $schedule->id,
-                    'name' => $schedule->name,
-                    'client_id' => $schedule->metadata['client_id'] ?? null,
-                    'service_name' => $schedule->metadata['service_name'] ?? null,
-                    'status' => $schedule->metadata['status'] ?? 'confirmed',
-                    'periods' => $schedule->periods->map(function ($period) {
-                        return [
-                            'start_time' => $period->start_time,
-                            'end_time' => $period->end_time
-                        ];
-                    })
-                ];
-            });
 
-        return response()->json($appointments);
-    }
 }
