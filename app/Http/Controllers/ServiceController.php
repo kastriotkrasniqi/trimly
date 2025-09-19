@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 
 class ServiceController extends Controller
@@ -64,11 +65,9 @@ class ServiceController extends Controller
     }
 
 
-    public function getServicesByEmployee($employee_id)
+    public function getServicesByEmployee(Employee $employee)
     {
-        $services = Service::whereHas('employees', function ($query) use ($employee_id) {
-            $query->where('employee_id', $employee_id);
-        })->get();
+        $services = $employee->services;
 
         return response()->json($services);
     }

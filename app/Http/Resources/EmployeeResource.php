@@ -16,9 +16,7 @@ class EmployeeResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user_id' => $this->user_id,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
+            'user' => $this->user,
             'phone' => $this->phone,
             'services' => ServiceResource::collection($this->whenLoaded('services')),
             'image' => $this->avatar,

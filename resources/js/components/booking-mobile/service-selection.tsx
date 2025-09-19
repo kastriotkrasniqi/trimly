@@ -3,6 +3,7 @@
     import { Button } from "@/components/ui/button"
     import { Card } from "@/components/ui/card"
     import { Service } from "@/types/booking"
+    import { getServicesByEmployee } from "@/actions/App/Http/Controllers/ServiceController"
 
     // Props for the service selection step
     interface ServiceSelectionProps {
@@ -27,7 +28,7 @@
         useEffect(() => {
             const fetchServices = async () => {
                 try {
-                    const response = await fetch(`/api/services/${selectedBarber}`)
+                    const response = await fetch(getServicesByEmployee.url(selectedBarber));
                     const data = await response.json()
                     setServices(data || [])
                 } catch (error) {

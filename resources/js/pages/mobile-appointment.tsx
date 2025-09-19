@@ -13,7 +13,7 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
   const [currentStep, setCurrentStep] = useState<BookingStep>("barber")
   const [processingState, setProcessingState] = useState<"loading"|"success"|"error">("loading")
   const [bookingError, setBookingError] = useState<string>("")
-  const [bookingId, setBookingId] = useState<string | number | null>(null)
+  const [bookingReference, setBookingReference] = useState<string | number | null>(null)
   const [direction, setDirection] = useState(1)
   // Persisted booking data
   const [selectedBarber, setSelectedBarber] = useState<string>("")
@@ -89,7 +89,7 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
         return;
       }
       const data = await res.json();
-      setBookingId(data.appointment_id);
+      setBookingReference(data.appointment?.metadata?.reference || "N/A");
       setProcessingState("success");
       setTimeout(() => {
         changeStep("success");
@@ -292,7 +292,7 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
           />
         )
       case "success":
-  return <BookingSuccess bookingId={bookingId ?? ""} onNewBooking={handleNewBooking} />
+  return <BookingSuccess bookingRef={bookingReference ?? ""} onNewBooking={handleNewBooking} />
       default:
         return null
     }

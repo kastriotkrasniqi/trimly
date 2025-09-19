@@ -92,21 +92,21 @@ import {
 } from "@/components/ui/table"
 
 import { index as employeesApi } from "@/actions/App/Http/Controllers/API/EmployeeController"
+import { User } from "@/types"
+import { Service } from "@/types/booking"
 
 type Item = {
   id: string;
-  user_id: string;
-  first_name: string;
-  last_name: string;
+  user: User[];
   phone: string;
   image?: string;
-  services?: { id: string; name: string }[];
+  services?: Service[];
 };
 
 // Custom filter function for multi-column searching
 const multiColumnFilterFn: FilterFn<Item> = (row, columnId, filterValue) => {
   const searchableRowContent =
-    `${row.original.first_name} ${row.original.last_name} ${row.original.phone}`.toLowerCase();
+  `${row.original.name ?? ""} ${row.original.phone ?? ""}`.toLowerCase();
   const searchTerm = (filterValue ?? "").toLowerCase();
   return searchableRowContent.includes(searchTerm);
 };
@@ -139,20 +139,26 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     header: "Name",
-    accessorKey: "name",
-    cell: ({ row }) => <div className="font-medium">{row.original.first_name} {row.original.last_name}</div>,
+    accessorKey: "user.name",
+    cell: ({ row }) => <div className="font-medium">{row.original.user?.name ?? ""}</div>,
     size: 180,
     filterFn: multiColumnFilterFn,
     enableHiding: false,
     sortingFn: (rowA, rowB) => {
-      const a = `${rowA.original.first_name} ${rowA.original.last_name}`.toLowerCase();
-      const b = `${rowB.original.first_name} ${rowB.original.last_name}`.toLowerCase();
+      const a = `${rowA.original.user?.name ?? ""}`.toLowerCase();
+      const b = `${rowB.original.user?.name ?? ""}`.toLowerCase();
       return a.localeCompare(b);
     },
   },
   {
     header: "Phone",
     accessorKey: "phone",
+    cell: ({ row }) => row.original.phone ?? "",
+    sortingFn: (rowA, rowB) => {
+      const a = `${rowA.original.phone ?? ""}`.toLowerCase();
+      const b = `${rowB.original.phone ?? ""}`.toLowerCase();
+      return a.localeCompare(b);
+    },
     size: 140,
   },
   {
@@ -165,6 +171,11 @@ const columns: ColumnDef<Item>[] = [
     header: "Services",
     accessorKey: "services",
     cell: ({ row }) => Array.isArray(row.original.services) ? row.original.services.map(s => s.name).join(", ") : "",
+    sortingFn: (rowA, rowB) => {
+      const a = Array.isArray(rowA.original.services) ? rowA.original.services.map(s => s.name).join(", ") : "";
+      const b = Array.isArray(rowB.original.services) ? rowB.original.services.map(s => s.name).join(", ") : "";
+      return a.localeCompare(b);
+    },
     size: 200,
   },
   {

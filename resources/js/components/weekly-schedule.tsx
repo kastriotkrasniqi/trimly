@@ -9,6 +9,7 @@ import { useForm } from '@inertiajs/react'
 import { toast } from "sonner";
 import { store } from '@/actions/App/Http/Controllers/ScheduleController';
 import { DaySchedule,WeeklyScheduleData } from "@/types"
+import { usePage } from "@inertiajs/react";
 
 const DAYS = [
   { key: "monday", label: "Monday" },
@@ -88,6 +89,9 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
   initialSchedules?: any,
   initialLunchBreak?: any
 }) {
+
+
+  const auth = usePage().props.auth;
   // Check if there are existing schedules
   const hasExistingSchedules = initialSchedules && Object.keys(initialSchedules).length > 0
 
@@ -192,7 +196,7 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
       return
     }
 
-    post(store.url(1), {
+    post(store.url(auth.user.id), {
       onSuccess: () => {
         toast.success("Schedule Saved", {
           description: "Your weekly schedule has been updated successfully.",

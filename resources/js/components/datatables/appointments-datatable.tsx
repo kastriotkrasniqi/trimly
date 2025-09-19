@@ -97,7 +97,7 @@ import { Service,Client } from "@/types/booking"
 type Item = {
   id: string;
   name: string;
-  client?: Array<Client>;
+  client?: [];
   services?: Array<Service>;
   price?: string;
   status?: string;
@@ -145,13 +145,18 @@ const columns: ColumnDef<Item>[] = [
     header: "Client",
     accessorKey: "client",
     cell: ({ row }) => {
-      const clientArr = row.original.client;
-      if (!Array.isArray(clientArr) || clientArr.length === 0) return "";
-      const client = clientArr[0];
+      const clientData = row.original.client;
+      let client = null;
+      if (Array.isArray(clientData)) {
+        if (clientData.length === 0) return "";
+        client = clientData[0];
+      } else if (typeof clientData === "object" && clientData !== null) {
+        client = clientData;
+      }
+      if (!client) return "";
       return (
         <div>
-          <div>{client.first_name ?? ""} {client.last_name ?? ""}</div>
-          <div className="text-xs text-muted-foreground">{client.email ?? ""}</div>
+          <div>{client.name ?? ""}</div>
           <div className="text-xs text-muted-foreground">{client.phone ?? ""}</div>
         </div>
       );
@@ -160,10 +165,16 @@ const columns: ColumnDef<Item>[] = [
     filterFn: multiColumnFilterFn,
     enableHiding: false,
     sortingFn: (rowA, rowB) => {
-      const aArr = rowA.original.client;
-      const bArr = rowB.original.client;
-      const a = Array.isArray(aArr) && aArr.length > 0 ? `${aArr[0].first_name ?? ""} ${aArr[0].last_name ?? ""}`.toLowerCase() : "";
-      const b = Array.isArray(bArr) && bArr.length > 0 ? `${bArr[0].first_name ?? ""} ${bArr[0].last_name ?? ""}`.toLowerCase() : "";
+      const getClientName = (clientData) => {
+        if (Array.isArray(clientData)) {
+          return clientData.length > 0 ? `${clientData[0].name ?? ""}`.toLowerCase() : "";
+        } else if (typeof clientData === "object" && clientData !== null) {
+          return `${clientData.name ?? ""}`.toLowerCase();
+        }
+        return "";
+      };
+      const a = getClientName(rowA.original.client);
+      const b = getClientName(rowB.original.client);
       return a.localeCompare(b);
     },
   },
@@ -445,15 +456,6 @@ export function AppointmentsDatatable() {
               </AlertDialogContent>
             </AlertDialog>
           )}
-          {/* Add user button */}
-          <Button className="ml-auto" variant="outline">
-            <PlusIcon
-              className="-ms-1 opacity-60"
-              size={16}
-              aria-hidden="true"
-            />
-            Add user
-          </Button>
         </div>
       </div>
 

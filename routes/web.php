@@ -1,18 +1,15 @@
 <?php
 
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\SlotController;
-use App\Http\Resources\EmployeeResource;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Models\Employee;
-use App\Services\TimeSlotGenerator;
-use Label84\HoursHelper\Facades\HoursHelper;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SlotController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\AppointmentController;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -20,35 +17,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-Route::get('/schedule/create', [\App\Http\Controllers\ScheduleController::class, 'create'])->name('schedule.create');
-
-Route::post('/api/appointments', [AppointmentController::class, 'store']);
-
-// Add route for getting slots from employee
-Route::get('/api/employee/{employee}/slots', action: [SlotController::class, 'getSlotsFromEmployee']);
-
-Route::get('/api/services/{employee_id}', [ServiceController::class, 'getServicesByEmployee']);
-
-Route::get('/mobile-test', function () {
-    $employees = EmployeeResource::collection(Employee::with('services')->get());
-    return Inertia::render('mobile-appointment', ['employees' => $employees]);
-});
+Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
+Route::post('/schedule/{employee}', [ScheduleController::class, 'store'])->name('schedule.store');
 
 
+Route::get('/services/{employee}', [ServiceController::class, 'getServicesByEmployee']);
+Route::get('/available-slots/{employee}', [SlotController::class, 'getAvailableSlots']);
 
-Route::get('/employees/{employee}/available-slots', [SlotController::class, 'getAvailableSlots']);
 Route::post('/appointments/book-appointment', [AppointmentController::class, 'store']);
 Route::get('/my-appointments', [AppointmentController::class, 'index'])->name('my-appointments');
 
 
-Route::resource('employees', \App\Http\Controllers\EmployeeController::class);
-
-Route::get('/employee/schedule', [\App\Http\Controllers\ScheduleController::class, 'index'])->name('schedule.index');
-Route::post('/employees/{employee}/schedule', [\App\Http\Controllers\ScheduleController::class, 'store'])->name('schedule.store');
-
-
-
-
+Route::resource('employees', EmployeeController::class);
 
 
 require __DIR__ . '/settings.php';

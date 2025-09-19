@@ -5,13 +5,12 @@ import { Card } from "@/components/ui/card"
 
 // Props for the booking success screen
 interface BookingSuccessProps {
-  bookingId: string | number;
+  bookingRef: string | number;
   onNewBooking?: () => void
 }
 
-export default function BookingSuccess({ bookingId, onNewBooking }: BookingSuccessProps) {
+export default function BookingSuccess({ bookingRef, onNewBooking }: BookingSuccessProps) {
   // Use the real booking ID as the reference
-  const bookingRef = `#${bookingId}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,7 +28,7 @@ export default function BookingSuccess({ bookingId, onNewBooking }: BookingSucce
         <Card className="bg-card border-border mb-6">
           <div className="p-4 text-center">
             <h3 className="font-semibold text-card-foreground mb-2">Booking Reference</h3>
-            <p className="text-2xl font-mono font-bold text-primary">{bookingRef}</p>
+            <p className="text-md font-mono font-bold text-primary">#{bookingRef}</p>
           </div>
         </Card>
 

@@ -109,7 +109,7 @@ export default function BookingConfirmation({
               )}
               <div className="flex-1">
                 <h3 className="font-semibold text-card-foreground text-base mb-1">
-                  {selectedBarber === "any" ? "Any Professional" : barber?.name}
+                  {selectedBarber === "any" ? "Any Professional" : barber?.user?.name}
                 </h3>
                 <p className="text-sm text-muted-foreground">Hair Stylist</p>
               </div>

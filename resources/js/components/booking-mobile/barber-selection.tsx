@@ -68,7 +68,7 @@ export default function BarberSelection({
                   <div className="flex justify-center">
                     <img
                       src={barber.image || "/placeholder.svg"}
-                      alt={barber.name}
+                      alt={barber.user.name}
                       className="w-16 h-16 rounded-lg object-cover"
                     />
                   </div>
@@ -78,7 +78,7 @@ export default function BarberSelection({
                         isSelected ? "text-primary-foreground" : "text-card-foreground"
                       }`}
                     >
-                      {barber.name}
+                      {barber.user.name}
                     </h3>
                     <p
                       className={`text-sm mt-1 ${

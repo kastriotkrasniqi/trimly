@@ -9,7 +9,7 @@ use App\Models\Service;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Zap\Facades\Zap;
-
+use Illuminate\Support\Str;
 class AppointmentController extends Controller
 {
 
@@ -43,10 +43,19 @@ class AppointmentController extends Controller
                 ->from($request->date)
                 ->addPeriod($request->start_time, $request->end_time)
                 ->withMetadata([
-                    'client' => [Client::find($request->client_id)->only('id', 'first_name', 'last_name', 'email', 'phone')],
+                        'client' => Client::select(
+                            'clients.id',
+                            'clients.user_id',
+                            'users.name as name',
+                            'clients.phone'
+                        )
+                            ->join('users', 'users.id', '=', 'clients.user_id')
+                            ->where('clients.id', $request->client_id)
+                            ->first(),
                     'services' => Service::whereIn('id', $request->service_ids)->get(['id', 'name', 'duration', 'price']),
                     'price' => $request->price,
-                    'status' => 'confirmed'
+                    'status' => 'confirmed',
+                    'reference' => Str::ulid(),
                 ])->save();
 
             return response()->json([

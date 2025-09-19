@@ -15,14 +15,14 @@ class EmployeeController extends Controller
     public function index()
     {
         $perPage = request('per_page', 10);
-        $query = Employee::with('services');
+        $query = Employee::with('services', 'user');
         $search = request('search');
         if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('first_name', 'like', "%$search%")
-                  ->orWhere('last_name', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%")
-                ;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('name', 'like', "%{$search}%");
+                })
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
         $employees = $query->paginate($perPage);

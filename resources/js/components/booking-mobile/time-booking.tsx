@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { format, addDays } from "date-fns"
 import { time } from "console"
+import { getAvailableSlots } from "@/actions/App/Http/Controllers/SlotController"
 
 // Type for a single time slot
 interface TimeSlot {
@@ -57,7 +58,12 @@ export default function TimeBooking({
         }
         setLoading(true)
         const dateStr = format(selectedDate, "yyyy-MM-dd")
-        const url = `/employees/${selectedBarber}/available-slots?date=${dateStr}&duration=${serviceDuration}`
+        const url = getAvailableSlots.url(selectedBarber, {
+            query: {
+                date: dateStr,
+                duration: serviceDuration,
+            },
+        });
         fetch(url)
             .then(res => res.json())
             .then(data => {

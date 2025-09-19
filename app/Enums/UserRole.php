@@ -2,11 +2,11 @@
 
 namespace App\Enums;
 
-enum UserRole: string
+enum UserRole: int
 {
-    case ADMIN = 'admin';
-    case CLIENT = 'client';
-    case EMPLOYEE = 'employee';
+    case ADMIN = 1;
+    case CLIENT = 2;
+    case EMPLOYEE = 3;
 
     public function label(): string
     {
@@ -26,5 +26,15 @@ enum UserRole: string
         };
     }
 
-
+    public static function options(): array
+    {
+        return array_map(
+            fn($role) => [
+                'value' => $role->value,
+                'label' => $role->label(),
+                'color' => $role->color(),
+            ],
+            self::cases()
+        );
+    }
 }

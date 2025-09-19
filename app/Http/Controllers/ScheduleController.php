@@ -16,8 +16,7 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-
-        $employee = Employee::find(1);
+        $employee = auth()->user()->employee;
         $schedules = [];
         $lunchBreak = null;
 
