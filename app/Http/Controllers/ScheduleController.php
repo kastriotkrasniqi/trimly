@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreScheduleRequest;
 use Inertia\Inertia;
 use Zap\Facades\Zap;
 use App\Models\Employee;
@@ -59,18 +60,11 @@ class ScheduleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Employee $employee)
+    public function store(StoreScheduleRequest $request, Employee $employee)
     {
-        sleep(1);
-        $request->validate([
-            'availability' => 'required|array',
-            'availability.*.enabled' => 'boolean',
-            'availability.*.startTime' => 'required_if:availability.*.enabled,true|date_format:H:i',
-            'availability.*.endTime' => 'required_if:availability.*.enabled,true|date_format:H:i|after:availability.*.startTime',
-            'lunch_break' => 'nullable|array',
-            'lunch_break.start' => 'required_with:lunch_break|date_format:H:i',
-            'lunch_break.end' => 'required_with:lunch_break|date_format:H:i|after:lunch_break.start',
-        ]);
+        sleep(1); // Simulate processing delay for better UX feedback
+
+        $request->validated();
 
         try {
             $service = app(WeeklyScheduleService::class);
