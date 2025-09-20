@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
         "laraveljutsu/zap": "^1.2",
+        "spatie/laravel-permission": "^6.21",
         "spatie/opening-hours": "^4.2"
     },
     "require-dev": {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Service;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ServiceController extends Controller
 {
@@ -13,7 +14,7 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('services/index');
     }
 
     /**
@@ -29,7 +30,18 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
+        ]);
+
+        $service = Service::create($validated);
+
+        $service->employees()->attach(auth()->user()->employee->id);
+
+        return redirect()->back()->with('success', 'Service created successfully.');
     }
 
     /**
@@ -45,7 +57,7 @@ class ServiceController extends Controller
      */
     public function edit(Service $service)
     {
-        //
+
     }
 
     /**
@@ -53,15 +65,25 @@ class ServiceController extends Controller
      */
     public function update(Request $request, Service $service)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
+        ]);
+
+        $service->update($validated);
+
+        return redirect()->back()->with('success', 'Service updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Service $service)
+    public function destroy(Request $request)
     {
-        //
+        Service::whereIn('id', $request->input('ids', []))->delete();
+        return redirect()->back()->with('success', 'Service(s) deleted successfully.');
     }
 
 

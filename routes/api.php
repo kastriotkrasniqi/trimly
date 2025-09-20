@@ -14,3 +14,6 @@ Route::get('/employees', [EmployeeController::class, 'index'])->name('api.employ
 
 //appointments
 Route::get('/appointments', [\App\Http\Controllers\API\AppointmentController::class, 'index'])->name('api.appointments.index');
+
+//services by employee
+Route::get('/services/{employee}', [\App\Http\Controllers\API\ServicesController::class, 'index'])->name('api.services.index');

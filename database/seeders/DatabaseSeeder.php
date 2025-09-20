@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             // EmployeeSeeder::class,
-            ClientSeeder::class,
+            // ClientSeeder::class,
+            PermissionSeeder::class,
             // ServiceSeeder::class,
             // ScheduleSeeder::class,
             // AppointmentSeeder::class,

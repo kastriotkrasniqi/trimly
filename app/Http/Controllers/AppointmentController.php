@@ -16,7 +16,7 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        return Inertia::render('my-appointments');
+        return Inertia::render('appointments/index');
     }
 
     public function store(StoreAppointmentRequest $request)

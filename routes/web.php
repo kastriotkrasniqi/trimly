@@ -20,7 +20,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
 Route::post('/schedule/{employee}', [ScheduleController::class, 'store'])->name('schedule.store');
 
-
+Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
+Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update');
+Route::post('/delete-services', [ServiceController::class, 'destroy'])->name('services.destroy');
 Route::get('/services/{employee}', [ServiceController::class, 'getServicesByEmployee']);
 Route::get('/available-slots/{employee}', [SlotController::class, 'getAvailableSlots']);
 
