@@ -84,7 +84,6 @@ import { update as updateServicesApi } from "@/actions/App/Http/Controllers/Serv
 import { store as storeServicesApi } from "@/actions/App/Http/Controllers/ServiceController";
 import { destroy as destroyServicesApi } from "@/actions/App/Http/Controllers/ServiceController";
 import { usePage, useForm, router } from "@inertiajs/react";
-import { toast } from "sonner";
 
 type Item = {
     id: string;
@@ -254,7 +253,6 @@ function AddServiceButton() {
             onSuccess: () => {
                 setOpen(false);
                 reset();
-                toast.success("Service created successfully");
             },
         });
     };
@@ -305,7 +303,6 @@ function RowActions({ row }: { row: Row<Item> }) {
         put(updateServicesApi.url(row.original.id), {
             onSuccess: () => {
                 reset();
-                toast.success("Service updated successfully");
                 setEditOpen(false);
             },
             onError: () => {
@@ -501,10 +498,6 @@ export function ServicesDatatable() {
                 const updatedData = data.filter((item) => !ids.includes(item.id));
                 setData(updatedData);
                 table.resetRowSelection();
-                toast.success('Selected services deleted');
-            },
-            onError: () => {
-                toast.error('Failed to delete selected services');
             },
         });
     };

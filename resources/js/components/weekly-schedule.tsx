@@ -188,27 +188,7 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
         }
       }
     })
-
-    if (validationErrors.length > 0) {
-      toast.error("Validation Error", {
-        description: validationErrors.map(e => typeof e === 'string' ? e : (e.description || JSON.stringify(e))).join("\n"),
-      })
-      return
-    }
-
-    post(store.url(auth.user.id), {
-      onSuccess: () => {
-        toast.success("Schedule Saved", {
-          description: "Your weekly schedule has been updated successfully.",
-        })
-      },
-      onError: (errors) => {
-        const errorMessages = Object.values(errors).flat().join(", ")
-        toast.error("Error", {
-          description: errorMessages,
-        })
-      }
-    })
+    post(store.url(auth.user.id))
   }
 
   const handleReset = () => {
