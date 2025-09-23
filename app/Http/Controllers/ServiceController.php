@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ServiceResource;
 use App\Models\Service;
 use App\Models\Employee;
 use Illuminate\Http\Request;
@@ -91,6 +92,6 @@ class ServiceController extends Controller
     {
         $services = $employee->services;
 
-        return response()->json($services);
+        return ServiceResource::collection($services);
     }
 }

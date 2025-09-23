@@ -13,6 +13,6 @@ class HomeController extends Controller
         $employees = EmployeeResource::collection(Employee::with('services')->whereHas('activeSchedules', function ($query) {
             $query->where('schedule_type', 'availability');
         })->get());
-        return Inertia::render('mobile-appointment', ['employees' => $employees]);
+        return Inertia::render('front/index', ['employees' => $employees]);
     }
 }

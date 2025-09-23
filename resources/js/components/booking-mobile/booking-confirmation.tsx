@@ -56,7 +56,7 @@ export default function BookingConfirmation({
 
   // Calculate total duration and price
   const totalDuration = services.reduce((acc, s) => acc + (parseInt(s.duration) || 0), 0)
-  const totalPrice = services.reduce((acc, s) => acc + (s.price || 0), 0)
+  const totalPrice = services.reduce((acc, s) => acc + (parseFloat(s.price) || 0), 0).toFixed(2);
 
   return (
     <div className="min-h-screen bg-background">

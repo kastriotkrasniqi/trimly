@@ -9,12 +9,13 @@ import { Barber, Service, TimeSlot } from "@/types/booking"
 
 type BookingStep = "barber" | "service" | "time" | "confirmation" | "processing" | "success"
 
-export default function BookingApp({ employees }: { employees: Barber[] }) {
+export default function BookingApp({ employees, onClose }: { employees: Barber[], onClose?: () => void }) {
   const [currentStep, setCurrentStep] = useState<BookingStep>("barber")
   const [processingState, setProcessingState] = useState<"loading"|"success"|"error">("loading")
   const [bookingError, setBookingError] = useState<string>("")
   const [bookingReference, setBookingReference] = useState<string | number | null>(null)
   const [direction, setDirection] = useState(1)
+  const [closing, setClosing] = useState(false)
   // Persisted booking data
   const [selectedBarber, setSelectedBarber] = useState<string>("")
   const [selectedServices, setSelectedServices] = useState<string[]>([])
@@ -122,7 +123,11 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
     }
   }
   const handleCloseBarberSelection = () => {
-    changeStep("time")
+    setClosing(true);
+    setTimeout(() => {
+      if (onClose) onClose();
+      setClosing(false);
+    }, 300); // match animation duration
   }
 
   // Centralized continue handler
@@ -240,21 +245,29 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
         );
       case "barber":
         return (
-          <BarberSelection
-            selectedBarber={selectedBarber}
-            onBarberSelect={handleBarberSelect}
-            onClose={handleCloseBarberSelection}
-            employees={employees}
-          />
+          <div className="h-full flex flex-col">
+            <div className="flex-1 pb-20">
+              <BarberSelection
+                selectedBarber={selectedBarber}
+                onBarberSelect={handleBarberSelect}
+                onClose={handleCloseBarberSelection}
+                employees={employees}
+              />
+            </div>
+          </div>
         )
       case "service":
         return (
-          <ServiceSelection
-            selectedBarber={selectedBarber}
-            selectedServices={selectedServices}
-            onServiceSelect={handleServiceSelect}
-            onBack={handleBack}
-          />
+          <div className="h-full flex flex-col">
+            <div className="flex-1 pb-20">
+              <ServiceSelection
+                selectedBarber={selectedBarber}
+                selectedServices={selectedServices}
+                onServiceSelect={handleServiceSelect}
+                onBack={handleBack}
+              />
+            </div>
+          </div>
         )
       case "time": {
         // Find the selected service's duration (assume first selected service for now)
@@ -269,67 +282,82 @@ export default function BookingApp({ employees }: { employees: Barber[] }) {
           }
         }
         return (
-          <TimeBooking
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            selectedBarber={selectedBarber}
-            serviceDuration={selectedServiceDuration}
-            onTimeSelect={handleTimeSelect}
-            onBack={handleBack}
-          />
+          <div className="h-full flex flex-col">
+            <div className="flex-1 pb-20">
+              <TimeBooking
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                selectedBarber={selectedBarber}
+                serviceDuration={selectedServiceDuration}
+                onTimeSelect={handleTimeSelect}
+                onBack={handleBack}
+              />
+            </div>
+          </div>
         );
       }
       case "confirmation":
         return (
-          <BookingConfirmation
-            selectedBarber={selectedBarber}
-            selectedServiceIds={selectedServices}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            employees={employees}
-            onBack={handleBack}
-            // onConfirm={handleConfirmBooking} // handled by main button
-          />
+          <div className="h-full flex flex-col">
+            <div className="flex-1 pb-20">
+              <BookingConfirmation
+                selectedBarber={selectedBarber}
+                selectedServiceIds={selectedServices}
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                employees={employees}
+                onBack={handleBack}
+              />
+            </div>
+          </div>
         )
       case "success":
-  return <BookingSuccess bookingRef={bookingReference ?? ""} onNewBooking={handleNewBooking} />
+        return <BookingSuccess bookingRef={bookingReference ?? ""} onNewBooking={handleNewBooking} />
       default:
         return null
     }
   }
 
   return (
-    <div className="relative w-full min-h-screen bg-background overflow-auto">
+    <div className="relative w-full h-screen bg-background overflow-hidden">
       <AnimatePresence initial={false} custom={direction}>
-        <motion.div
-          key={currentStep}
-          custom={direction}
-          initial={{ x: direction * 300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -direction * 300, opacity: 0 }}
-          transition={{ type: "tween", duration: 0.25 }}
-          className="absolute top-0 left-0 w-full h-full"
-        >
-          {renderStep(currentStep)}
-          {/* Continue button for all steps except success */}
-          {/* Animated Continue button, slides in from bottom when enabled */}
-          {currentStep !== "success" && (
-            <AnimatePresence>
-              {isContinueEnabled() && (
-                <motion.button
-                  initial={{ y: 100, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 100, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                  className="sticky mt-2 left-1/2 bottom-6 z-50 -translate-x-1/2 px-6 py-3 bg-primary text-white rounded-2xl shadow-lg"
-                  onClick={handleContinue}
-                >
-                  {getContinueLabel()}
-                </motion.button>
-              )}
-            </AnimatePresence>
-          )}
-        </motion.div>
+        {!closing && (
+          <motion.div
+            key={currentStep}
+            custom={direction}
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 300, opacity: 0 }}
+            transition={{ type: "tween", duration: 0.3 }}
+            className="absolute inset-0 flex flex-col"
+          >
+            <div className="flex-1 overflow-auto">
+              {renderStep(currentStep)}
+            </div>
+
+            {/* Fixed Continue button at the bottom */}
+            {currentStep !== "success" && currentStep !== "processing" && (
+              <AnimatePresence>
+                {isContinueEnabled() && (
+                  <motion.div
+                    initial={{ y: 100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 100, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-50"
+                  >
+                    <button
+                      className="w-full px-6 py-3 bg-primary text-white rounded-2xl shadow-lg font-medium"
+                      onClick={handleContinue}
+                    >
+                      {getContinueLabel()}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            )}
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   )
