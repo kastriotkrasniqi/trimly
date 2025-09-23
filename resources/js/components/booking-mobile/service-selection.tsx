@@ -71,7 +71,7 @@
                 </div>
 
                 {/* Services List */}
-                <div className="px-4 py-6 space-y-0 max-w-md mx-auto divide-y divide-border">
+                <div className="px-4 py-6 space-y-0 max-w-md mx-auto divide-y divide-border pb-24">
                     {services.map((service) => {
                         const isSelected = selectedServices.includes(service.id)
                         return (
@@ -114,7 +114,6 @@
                     })}
                 </div>
 
-                {/* Continue button removed; handled by main template */}
             </div>
         )
     }

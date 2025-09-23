@@ -130,6 +130,15 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
     }, 300); // match animation duration
   }
 
+    const handleCloseSuccess = () => {
+    setClosing(true);
+    setTimeout(() => {
+        if (onClose) onClose();
+        setClosing(false);
+    }
+    , 300); // match animation duration
+}
+
   // Centralized continue handler
   const handleContinue = () => {
     switch (currentStep) {
@@ -312,14 +321,14 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
           </div>
         )
       case "success":
-        return <BookingSuccess bookingRef={bookingReference ?? ""} onNewBooking={handleNewBooking} />
+        return <BookingSuccess bookingRef={bookingReference ?? ""} onNewBooking={handleNewBooking} onClose={handleCloseSuccess} />
       default:
         return null
     }
   }
 
   return (
-    <div className="relative w-full h-screen bg-background overflow-hidden">
+    <div className="relative w-full h-screen bg-background overflow-hidden rounded-2xl">
       <AnimatePresence initial={false} custom={direction}>
         {!closing && (
           <motion.div

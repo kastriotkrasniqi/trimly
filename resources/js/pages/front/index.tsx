@@ -3,15 +3,6 @@ import { Scissors } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import BookingApp from '@/pages/mobile-appointment';
 
-const services = [
-  { name: 'Haircut', description: 'Classic, modern, and trendy styles.' },
-  { name: 'Beard Trim', description: 'Expert shaping and grooming.' },
-  { name: 'Shave', description: 'Hot towel and straight razor.' },
-  { name: 'Facial', description: 'Relaxing skin treatments.' },
-];
-
-
-
 export default function HomePage({ employees }: { employees: any[] }) {
   const [navOpen, setNavOpen] = useState(false);
   const [showBooking, setShowBooking] = useState(false);

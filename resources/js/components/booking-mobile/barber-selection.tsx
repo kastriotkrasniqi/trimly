@@ -50,7 +50,7 @@ export default function BarberSelection({
         </div>
       </div>
 
-      <div className="px-4 py-6 max-w-md mx-auto overflow-x-auto">
+      <div className="px-4 py-6 max-w-md mx-auto pb-24">
         <div className="grid grid-cols-2 gap-4">
           {employees.map((barber) => {
             const isSelected = selected === barber.id
@@ -94,8 +94,6 @@ export default function BarberSelection({
           })}
         </div>
       </div>
-
-      {/* Continue button removed; handled by main template */}
     </div>
   )
 }

@@ -104,7 +104,7 @@ export default function TimeBooking({
                 </div>
             </div>
 
-            <div className="px-4 py-6 md:max-w-md mx-auto space-y-8">
+            <div className="px-4 py-6 md:max-w-md mx-auto space-y-8 pb-24">
                 {/* Calendar for date selection */}
                 <Calendar
                     mode="single"

@@ -75,7 +75,7 @@ export default function BookingConfirmation({
         </div>
       </div>
 
-      <div className="px-4 py-6 max-w-md mx-auto space-y-6">
+      <div className="px-4 py-6 pb-24 max-w-md mx-auto space-y-6">
         {/* Date & Time */}
         <Card className="bg-card border border-border mb-4 shadow-sm">
           <div className="p-4">
