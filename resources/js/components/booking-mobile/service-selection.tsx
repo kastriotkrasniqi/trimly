@@ -119,7 +119,7 @@ import { getServicesByEmployee } from "@/actions/App/Http/Controllers/ServiceCon
                             const isSelected = selectedServices.includes(service.id)
                             return (
                                 <div key={service.id} className="py-4">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-start justify-between">
                                         {/* Service Info */}
                                         <div className="flex flex-col flex-1 min-w-0">
                                             <h3 className="font-medium text-card-foreground truncate">

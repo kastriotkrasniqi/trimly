@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AppointmentBooked;
 use App\Http\Requests\StoreAppointmentRequest;
-use App\Http\Resources\AppointmentResource;
 use App\Models\Client;
 use App\Models\Employee;
 use App\Models\Service;
@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Zap\Facades\Zap;
 use Illuminate\Support\Str;
+use Zap\Exceptions\ScheduleConflictException;
+
 class AppointmentController extends Controller
 {
 
@@ -29,7 +31,7 @@ class AppointmentController extends Controller
 
         try {
             $services = Service::whereIn('id', $request->service_ids)->get(['id', 'name', 'duration', 'price']);
-            $client = Client::select('clients.id','clients.user_id','users.name as name','clients.phone')
+            $client = Client::select('clients.id', 'clients.user_id', 'users.name as name', 'clients.phone')
                 ->join('users', 'users.id', '=', 'clients.user_id')
                 ->where('clients.id', $request->client_id)
                 ->first();
@@ -47,10 +49,19 @@ class AppointmentController extends Controller
                     'reference' => Str::ulid(),
                 ])->save();
 
+
+            AppointmentBooked::dispatch($appointment, $client, $employee, $services);
+
+
             return response()->json([
                 'message' => 'Appointment booked successfully',
                 'appointment' => $appointment
             ]);
+
+        } catch (ScheduleConflictException $e) {
+            return response()->json([
+                'error' => 'The selected time slot is already booked. Please choose a different time.'
+            ], 409);
 
         } catch (\Exception $e) {
             return response()->json([

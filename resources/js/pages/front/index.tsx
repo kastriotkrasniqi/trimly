@@ -105,7 +105,7 @@ export default function HomePage({ employees }: HomePageProps) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'tween', duration: 0.35, ease: 'easeInOut' }}
-            className="absolute inset-0 top-16 sm:top-20 z-40 bg-background/95 backdrop-blur-sm"
+            className="absolute inset-0 top-16 sm:top-20 z-40 bg-background/95 backdrop-blur-sm rounded-2xl"
           >
             <div className="h-full w-full max-w-md mx-auto">
               <BookingApp employees={employees} onClose={handleCloseBooking} />

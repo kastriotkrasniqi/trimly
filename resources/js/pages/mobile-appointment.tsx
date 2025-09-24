@@ -109,14 +109,45 @@ export default function BookingApp({ employees, onClose }: BookingAppProps) {
       });
 
       if (!response.ok) {
-        let errorText = await response.text();
-        if (/<[a-z][\s\S]*>/i.test(errorText)) {
-          const doc = document.createElement('div');
-          doc.innerHTML = errorText;
-          errorText = doc.textContent || doc.innerText || "Failed to book appointment. Please try again.";
-          errorText = errorText.trim().split('\n').slice(0, 3).join(' ');
+        let errorMessage = "Failed to book appointment. Please try again.";
+
+        try {
+          const errorText = await response.text();
+
+          // Try to parse as JSON first
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.error) {
+              errorMessage = errorData.error;
+            } else if (errorData.message) {
+              errorMessage = errorData.message;
+            } else if (errorData.errors) {
+              // Handle validation errors
+              const firstError = Object.values(errorData.errors)[0];
+              errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+            }
+
+            // Clean up the error message - remove any remaining JSON structure
+            errorMessage = errorMessage.toString().replace(/^["']|["']$/g, ''); // Remove quotes
+            errorMessage = errorMessage.replace(/^\{.*?"error":\s*"([^"]+)".*\}$/i, '$1'); // Extract from JSON structure
+            errorMessage = errorMessage.replace(/^\{.*?"message":\s*"([^"]+)".*\}$/i, '$1'); // Extract from JSON structure
+          } catch {
+            // If not JSON, check if it's HTML and extract text
+            if (/<[a-z][\s\S]*>/i.test(errorText)) {
+              const doc = document.createElement('div');
+              doc.innerHTML = errorText;
+              const textContent = doc.textContent || doc.innerText || "";
+              errorMessage = textContent.trim().split('\n').slice(0, 3).join(' ') || errorMessage;
+            } else {
+              // Plain text error
+              errorMessage = errorText.trim() || errorMessage;
+            }
+          }
+        } catch {
+          // Keep default error message
         }
-        throw new Error(errorText || "Failed to book appointment. Please try again.");
+
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -271,21 +302,39 @@ export default function BookingApp({ employees, onClose }: BookingAppProps) {
               </motion.div>
             )}
             {processingState === "error" && (
-              <>
-                <div className="w-20 h-20 mb-6 rounded-full bg-red-500 flex items-center justify-center">
-                  <svg className="w-12 h-12" viewBox="0 0 24 24">
-                    <path d="M6 18L18 6M6 6l12 12" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              <motion.div
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 60, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                className="flex flex-col items-center max-w-sm mx-auto px-4"
+              >
+                <div className="w-20 h-20 mb-6 rounded-full bg-red-100 flex items-center justify-center">
+                  <svg className="w-12 h-12 text-red-500" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="m15 9-6 6" stroke="currentColor" strokeWidth="2"/>
+                    <path d="m9 9 6 6" stroke="currentColor" strokeWidth="2"/>
                   </svg>
                 </div>
-                <div className="text-xl font-semibold text-red-600 mb-2">Booking Failed</div>
-                <div className="text-base text-red-500 mb-4 max-w-xs text-center">{bookingError}</div>
-                <button
-                  className="px-6 py-2 bg-primary text-white rounded-xl shadow"
-                  onClick={() => changeStep("confirmation")}
-                >
-                  Try Again
-                </button>
-              </>
+                <div className="text-xl font-semibold text-foreground mb-3 text-center">Oops! Something went wrong</div>
+                <div className="text-base text-muted-foreground mb-6 text-center leading-relaxed">
+                  {bookingError}
+                </div>
+                <div className="flex flex-col gap-3 w-full">
+                  <button
+                    className="w-full px-6 py-3 bg-primary text-white rounded-xl shadow-sm hover:bg-primary/90 transition-colors font-medium"
+                    onClick={() => changeStep("time")}
+                  >
+                    Choose Another Time
+                  </button>
+                  <button
+                    className="w-full px-6 py-3 bg-transparent border border-border text-foreground rounded-xl hover:bg-muted transition-colors"
+                    onClick={handleClose}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
             )}
           </div>
         );
