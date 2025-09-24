@@ -1,11 +1,10 @@
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { format, addDays } from "date-fns"
-import { time } from "console"
 import { getAvailableSlots } from "@/actions/App/Http/Controllers/SlotController"
 
 // Type for a single time slot
@@ -74,18 +73,27 @@ export default function TimeBooking({
     }, [selectedBarber, selectedDate, serviceDuration])
 
     // Handle time slot selection
-    const handleTimeSelect = (time: string) => {
+    const handleTimeSelect = useCallback((time: string) => {
         setSelectedTime(time)
-        if (onTimeSelect) {
-            onTimeSelect(time, selectedDate)
-        }
-    }
+        onTimeSelect?.(time, selectedDate)
+    }, [onTimeSelect, selectedDate])
 
     // Format date for display
-    const getDateString = (date: Date | undefined) => {
-        if (!date || !(date instanceof Date)) return ""
-        return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })
-    }
+    const getDateString = useMemo(() => {
+        if (!selectedDate || !(selectedDate instanceof Date)) return ""
+        return selectedDate.toLocaleDateString(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric"
+        })
+    }, [selectedDate])
+
+    const handleDateSelect = useCallback((date: Date | undefined) => {
+        if (!date) return
+        setSelectedDate(date)
+        setSelectedTime("")
+        onTimeSelect?.("", date)
+    }, [onTimeSelect])
 
     return (
         <div className="min-h-screen bg-background">
@@ -109,13 +117,7 @@ export default function TimeBooking({
                 <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={(date) => {
-                        setSelectedDate(date);
-                        setSelectedTime("");
-                        if (onTimeSelect) {
-                            onTimeSelect("", date);
-                        }
-                    }}
+                    onSelect={handleDateSelect}
                     className="rounded-md border p-2 w-full"
                     classNames={{
                         caption_label: "text-base md:text-lg",
@@ -133,7 +135,7 @@ export default function TimeBooking({
                     <div className="flex items-center justify-between">
                         <h3 className="text-base font-medium text-foreground">Available Times</h3>
                         {selectedDate && (
-                            <span className="text-sm text-muted-foreground">{getDateString(selectedDate)}</span>
+                            <span className="text-sm text-muted-foreground">{getDateString}</span>
                         )}
                     </div>
 

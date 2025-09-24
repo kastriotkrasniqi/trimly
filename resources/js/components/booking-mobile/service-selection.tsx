@@ -1,11 +1,9 @@
-    import { useEffect, useState } from "react"
-    import { ChevronDown, ChevronLeft } from "lucide-react"
-    import { Button } from "@/components/ui/button"
-    import { Card } from "@/components/ui/card"
-    import { Service } from "@/types/booking"
-    import { getServicesByEmployee } from "@/actions/App/Http/Controllers/ServiceController"
-
-    // Props for the service selection step
+import { useState, useEffect, useCallback } from "react"
+import { ChevronDown, ChevronLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Service } from "@/types/booking"
+import { getServicesByEmployee } from "@/actions/App/Http/Controllers/ServiceController"    // Props for the service selection step
     interface ServiceSelectionProps {
         onServiceSelect: (serviceIds: string[]) => void
         onBack?: () => void
@@ -19,41 +17,57 @@
         selectedBarber,
         selectedServices,
     }: ServiceSelectionProps) {
-        // State for expanded service details
-        const [expandedService, setExpandedService] = useState<string>("")
-        // State for fetched services
-        const [services, setServices] = useState<Service[]>([])
+    // State for expanded service details
+    const [expandedService, setExpandedService] = useState<string>("")
+    // State for fetched services
+    const [services, setServices] = useState<Service[]>([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string>("")
 
-        // Fetch services for the selected barber
-        useEffect(() => {
-            const fetchServices = async () => {
-                try {
-                    const response = await fetch(getServicesByEmployee.url(selectedBarber));
-                    const data = await response.json()
-                    setServices(data || [])
-                } catch (error) {
-                    setServices([])
+    // Fetch services for the selected barber
+    useEffect(() => {
+        const fetchServices = async () => {
+            if (!selectedBarber) {
+                setServices([])
+                return
+            }
+
+            setLoading(true)
+            setError("")
+
+            try {
+                const response = await fetch(getServicesByEmployee.url(selectedBarber));
+                if (!response.ok) {
+                    throw new Error('Failed to fetch services')
                 }
+                const data = await response.json()
+                setServices(Array.isArray(data) ? data : [])
+            } catch (error) {
+                console.error('Error fetching services:', error)
+                setError('Failed to load services')
+                setServices([])
+            } finally {
+                setLoading(false)
             }
-            if (selectedBarber) {
-                fetchServices()
-            }
-        }, [selectedBarber])
-
-        // Toggle service selection
-        const handleServiceToggle = (serviceId: string) => {
-            const updated = selectedServices.includes(serviceId)
-                ? selectedServices.filter((id) => id !== serviceId)
-                : [...selectedServices, serviceId]
-            if (onServiceSelect) onServiceSelect(updated)
         }
 
-        // Toggle expanded service details
-        const toggleServiceDetails = (serviceId: string) => {
-            setExpandedService(expandedService === serviceId ? "" : serviceId)
-        }
+        fetchServices()
+    }, [selectedBarber])
 
-        return (
+    // Toggle service selection
+    const handleServiceToggle = useCallback((serviceId: string) => {
+        const updated = selectedServices.includes(serviceId)
+            ? selectedServices.filter((id) => id !== serviceId)
+            : [...selectedServices, serviceId]
+        onServiceSelect?.(updated)
+    }, [selectedServices, onServiceSelect])
+
+    // Toggle expanded service details
+    const toggleServiceDetails = useCallback((serviceId: string) => {
+        setExpandedService(prev => prev === serviceId ? "" : serviceId)
+    }, [])
+
+    return (
             <div className="min-h-screen bg-background">
                 {/* Mobile App Header */}
                 <div className="sticky top-0 bg-background z-10">
@@ -72,46 +86,78 @@
 
                 {/* Services List */}
                 <div className="px-4 py-6 space-y-0 max-w-md mx-auto divide-y divide-border pb-24">
-                    {services.map((service) => {
-                        const isSelected = selectedServices.includes(service.id)
-                        return (
-                            <div key={service.id} className="py-4">
+                    {loading ? (
+                        // Loading skeleton
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="py-4 animate-pulse">
                                 <div className="flex items-center justify-between">
-                                    {/* Service Info */}
-                                    <div className="flex flex-col">
-                                        <h3 className="font-medium text-card-foreground">
-                                            {service.name} - {service.duration}min
-                                        </h3>
-                                        <button
-                                            type="button"
-                                            className="text-blue-500 hover:underline text-sm font-normal inline-flex items-center mt-1"
-                                            onClick={() => toggleServiceDetails(service.id)}
-                                        >
-                                            Service details
-                                            <ChevronDown
-                                                className={`ml-1 h-4 w-4 transition-transform ${expandedService === service.id ? "rotate-180" : ""}`}
-                                            />
-                                        </button>
-                                        {expandedService === service.id && service.description && (
-                                            <div className="mt-2 text-sm text-muted-foreground">
-                                                {service.description}
-                                            </div>
-                                        )}
+                                    <div className="flex-1">
+                                        <div className="h-5 bg-muted rounded w-3/4 mb-2"></div>
+                                        <div className="h-4 bg-muted rounded w-1/2"></div>
                                     </div>
-                                    {/* Price Button */}
-                                    <Button
-                                        variant={isSelected ? "default" : "outline"}
-                                        onClick={() => handleServiceToggle(service.id)}
-                                        className={`ml-4 rounded-xl px-6 py-5 text-primary font-semibold text-base tracking-wide transition border border-muted ${
-                                            isSelected ? "bg-primary text-white" : "border text-foreground"
-                                        }`}
-                                    >
-                                        €{service.price}
-                                    </Button>
+                                    <div className="ml-4 h-12 w-20 bg-muted rounded-xl"></div>
                                 </div>
                             </div>
-                        )
-                    })}
+                        ))
+                    ) : error ? (
+                        <div className="py-8 text-center">
+                            <p className="text-destructive mb-4">{error}</p>
+                            <Button
+                                variant="outline"
+                                onClick={() => window.location.reload()}
+                                className="text-sm"
+                            >
+                                Try Again
+                            </Button>
+                        </div>
+                    ) : services.length === 0 ? (
+                        <div className="py-8 text-center text-muted-foreground">
+                            No services available for this barber
+                        </div>
+                    ) : (
+                        services.map((service) => {
+                            const isSelected = selectedServices.includes(service.id)
+                            return (
+                                <div key={service.id} className="py-4">
+                                    <div className="flex items-center justify-between">
+                                        {/* Service Info */}
+                                        <div className="flex flex-col flex-1 min-w-0">
+                                            <h3 className="font-medium text-card-foreground truncate">
+                                                {service.name} - {service.duration}min
+                                            </h3>
+                                            <button
+                                                type="button"
+                                                className="text-blue-500 hover:underline text-sm font-normal inline-flex items-center mt-1 self-start"
+                                                onClick={() => toggleServiceDetails(service.id)}
+                                            >
+                                                Service details
+                                                <ChevronDown
+                                                    className={`ml-1 h-4 w-4 transition-transform ${expandedService === service.id ? "rotate-180" : ""}`}
+                                                />
+                                            </button>
+                                            {expandedService === service.id && service.description && (
+                                                <div className="mt-2 text-sm text-muted-foreground">
+                                                    {service.description}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {/* Price Button */}
+                                        <Button
+                                            variant={isSelected ? "default" : "outline"}
+                                            onClick={() => handleServiceToggle(service.id)}
+                                            className={`ml-4 rounded-xl px-4 sm:px-6 py-3 sm:py-5 font-semibold text-sm sm:text-base tracking-wide transition border ${
+                                                isSelected
+                                                    ? "bg-primary text-primary-foreground border-primary"
+                                                    : "border-border text-foreground hover:bg-muted"
+                                            }`}
+                                        >
+                                            €{service.price}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )
+                        })
+                    )}
                 </div>
 
             </div>

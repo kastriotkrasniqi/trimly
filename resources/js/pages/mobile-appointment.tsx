@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import ServiceSelection from "@/components/booking-mobile/service-selection"
 import TimeBooking from "@/components/booking-mobile/time-booking"
@@ -9,67 +9,97 @@ import { Barber, Service, TimeSlot } from "@/types/booking"
 
 type BookingStep = "barber" | "service" | "time" | "confirmation" | "processing" | "success"
 
-export default function BookingApp({ employees, onClose }: { employees: Barber[], onClose?: () => void }) {
+interface BookingData {
+  selectedBarber: string;
+  selectedServices: string[];
+  selectedDate: Date;
+  selectedTime: string;
+}
+
+interface BookingAppProps {
+  employees: Barber[];
+  onClose?: () => void;
+}
+
+export default function BookingApp({ employees, onClose }: BookingAppProps) {
   const [currentStep, setCurrentStep] = useState<BookingStep>("barber")
-  const [processingState, setProcessingState] = useState<"loading"|"success"|"error">("loading")
+  const [processingState, setProcessingState] = useState<"loading" | "success" | "error">("loading")
   const [bookingError, setBookingError] = useState<string>("")
   const [bookingReference, setBookingReference] = useState<string | number | null>(null)
   const [direction, setDirection] = useState(1)
   const [closing, setClosing] = useState(false)
+
   // Persisted booking data
-  const [selectedBarber, setSelectedBarber] = useState<string>("")
-  const [selectedServices, setSelectedServices] = useState<string[]>([])
-  const [selectedDate, setSelectedDate] = useState<number>(new Date())
-  const [selectedTime, setSelectedTime] = useState<string>("")
+  const [bookingData, setBookingData] = useState<BookingData>({
+    selectedBarber: "",
+    selectedServices: [],
+    selectedDate: new Date(),
+    selectedTime: ""
+  })
 
-  const stepOrder: BookingStep[] = ["barber", "service", "time", "confirmation", "success"]
+  const stepOrder: BookingStep[] = useMemo(() =>
+    ["barber", "service", "time", "confirmation", "success"], []
+  )
 
-  const changeStep = (step: BookingStep) => {
+  const changeStep = useCallback((step: BookingStep) => {
     setDirection(stepOrder.indexOf(step) > stepOrder.indexOf(currentStep) ? 1 : -1)
     setCurrentStep(step)
-  }
+  }, [stepOrder, currentStep])
 
-  // Step handlers (no longer auto-advance)
-  const handleBarberSelect = (barberId: string) => {
-    setSelectedBarber(barberId)
-  }
-  const handleServiceSelect = (services: string[]) => {
-    setSelectedServices(services)
-  }
-  const handleTimeSelect = (time: string, date: number) => {
-    setSelectedTime(time)
-    setSelectedDate(date)
-  }
+  // Step handlers with optimized state updates
+  const handleBarberSelect = useCallback((barberId: string) => {
+    setBookingData(prev => ({ ...prev, selectedBarber: barberId }))
+  }, [])
+
+  const handleServiceSelect = useCallback((services: string[]) => {
+    setBookingData(prev => ({ ...prev, selectedServices: services }))
+  }, [])
+
+  const handleTimeSelect = useCallback((time: string, date: Date) => {
+    setBookingData(prev => ({
+      ...prev,
+      selectedTime: time,
+      selectedDate: date
+    }))
+  }, [])
+
   // Simulate getting the client_id (replace with real auth/user context in production)
   const clientId = 1;
 
   // POST appointment to backend
-  const handleConfirmBooking = async () => {
-  changeStep("processing");
-  setProcessingState("loading");
-  setBookingError("");
+  const handleConfirmBooking = useCallback(async () => {
+    changeStep("processing");
+    setProcessingState("loading");
+    setBookingError("");
+
     try {
       // Find selected barber and service details
-      const barber = employees.find(e => e.id === selectedBarber);
-      const serviceObjs = barber && barber.services ? barber.services.filter(s => selectedServices.includes(s.id)) : [];
+      const barber = employees.find(e => e.id === bookingData.selectedBarber);
+      const serviceObjs = barber?.services?.filter(s =>
+        bookingData.selectedServices.includes(s.id)
+      ) || [];
+
       // Calculate end time based on duration
-      const startDate = new Date(selectedDate);
-      const [startHour, startMinute] = selectedTime.split(":").map(Number);
+      const startDate = new Date(bookingData.selectedDate);
+      const [startHour, startMinute] = bookingData.selectedTime.split(":").map(Number);
       startDate.setHours(startHour, startMinute, 0, 0);
+
       const totalDuration = serviceObjs.reduce((acc, s) => acc + (parseInt(s.duration) || 0), 0);
       const endDate = new Date(startDate.getTime() + totalDuration * 60000);
-      const pad = (n) => n.toString().padStart(2, "0");
+
+      const pad = (n: number) => n.toString().padStart(2, "0");
       const payload = {
         client_id: clientId,
-        employee_id: selectedBarber,
+        employee_id: bookingData.selectedBarber,
         date: startDate.toISOString().slice(0, 10),
         start_time: `${pad(startDate.getHours())}:${pad(startDate.getMinutes())}`,
         end_time: `${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`,
-        price: serviceObjs.reduce((acc, s) => acc + (s.price || 0), 0),
-        service_ids: selectedServices,
+        price: serviceObjs.reduce((acc, s) => acc + (parseFloat(s.price) || 0), 0),
+        service_ids: bookingData.selectedServices,
       };
+
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-      const res = await fetch("/appointments/book-appointment", {
+      const response = await fetch("/appointments/book-appointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -77,37 +107,42 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
         },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        let errorText = await res.text();
+
+      if (!response.ok) {
+        let errorText = await response.text();
         if (/<[a-z][\s\S]*>/i.test(errorText)) {
           const doc = document.createElement('div');
           doc.innerHTML = errorText;
           errorText = doc.textContent || doc.innerText || "Failed to book appointment. Please try again.";
           errorText = errorText.trim().split('\n').slice(0, 3).join(' ');
         }
-        setProcessingState("error");
-        setBookingError(errorText || "Failed to book appointment. Please try again.");
-        return;
+        throw new Error(errorText || "Failed to book appointment. Please try again.");
       }
-      const data = await res.json();
+
+      const data = await response.json();
       setBookingReference(data.appointment?.metadata?.reference || "N/A");
       setProcessingState("success");
+
       setTimeout(() => {
         changeStep("success");
       }, 900);
-    } catch (e) {
+    } catch (error) {
+      console.error('Booking error:', error);
       setProcessingState("error");
-      setBookingError("Failed to book appointment. Please try again.");
+      setBookingError(error instanceof Error ? error.message : "Failed to book appointment. Please try again.");
     }
-  }
-  const handleNewBooking = () => {
-    setSelectedBarber("")
-    setSelectedServices([])
-    setSelectedTime("")
-    setSelectedDate(3)
+  }, [bookingData, employees, clientId, changeStep])
+  const handleNewBooking = useCallback(() => {
+    setBookingData({
+      selectedBarber: "",
+      selectedServices: [],
+      selectedTime: "",
+      selectedDate: new Date()
+    })
     changeStep("barber")
-  }
-  const handleBack = () => {
+  }, [changeStep])
+
+  const handleBack = useCallback(() => {
     switch (currentStep) {
       case "service":
         changeStep("barber")
@@ -121,26 +156,18 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
       default:
         break
     }
-  }
-  const handleCloseBarberSelection = () => {
+  }, [currentStep, changeStep])
+
+  const handleClose = useCallback(() => {
     setClosing(true);
     setTimeout(() => {
-      if (onClose) onClose();
+      onClose?.();
       setClosing(false);
     }, 300); // match animation duration
-  }
-
-    const handleCloseSuccess = () => {
-    setClosing(true);
-    setTimeout(() => {
-        if (onClose) onClose();
-        setClosing(false);
-    }
-    , 300); // match animation duration
-}
+  }, [onClose])
 
   // Centralized continue handler
-  const handleContinue = () => {
+  const handleContinue = useCallback(() => {
     switch (currentStep) {
       case "barber":
         changeStep("service")
@@ -157,26 +184,26 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
       default:
         break
     }
-  }
+  }, [currentStep, changeStep, handleConfirmBooking])
 
   // Determine if continue should be enabled
-  const isContinueEnabled = () => {
+  const isContinueEnabled = useMemo(() => {
     switch (currentStep) {
       case "barber":
-        return !!selectedBarber
+        return !!bookingData.selectedBarber
       case "service":
-        return selectedServices.length > 0
+        return bookingData.selectedServices.length > 0
       case "time":
-        return !!selectedTime
+        return !!bookingData.selectedTime
       case "confirmation":
         return true
       default:
         return false
     }
-  }
+  }, [currentStep, bookingData])
 
   // Continue button label
-  const getContinueLabel = () => {
+  const getContinueLabel = useMemo(() => {
     switch (currentStep) {
       case "confirmation":
         return "Confirm Booking"
@@ -185,7 +212,17 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
       default:
         return "Continue"
     }
-  }
+  }, [currentStep])
+
+  // Calculate selected service duration outside of renderStep to avoid hook issues
+  const selectedServiceDuration = useMemo(() => {
+    if (bookingData.selectedServices.length > 0 && employees.length > 0) {
+      const barber = employees.find(e => e.id === bookingData.selectedBarber);
+      const service = barber?.services?.find(s => s.id === bookingData.selectedServices[0]);
+      return service?.duration || 30;
+    }
+    return 30;
+  }, [bookingData.selectedServices, bookingData.selectedBarber, employees])
 
   // Render steps with persisted data (no continue button in children)
   const renderStep = (step: BookingStep) => {
@@ -257,9 +294,9 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
           <div className="h-full flex flex-col">
             <div className="flex-1 pb-20">
               <BarberSelection
-                selectedBarber={selectedBarber}
+                selectedBarber={bookingData.selectedBarber}
                 onBarberSelect={handleBarberSelect}
-                onClose={handleCloseBarberSelection}
+                onClose={handleClose}
                 employees={employees}
               />
             </div>
@@ -270,50 +307,38 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
           <div className="h-full flex flex-col">
             <div className="flex-1 pb-20">
               <ServiceSelection
-                selectedBarber={selectedBarber}
-                selectedServices={selectedServices}
+                selectedBarber={bookingData.selectedBarber}
+                selectedServices={bookingData.selectedServices}
                 onServiceSelect={handleServiceSelect}
                 onBack={handleBack}
               />
             </div>
           </div>
         )
-      case "time": {
-        // Find the selected service's duration (assume first selected service for now)
-        let selectedServiceDuration = 30;
-        if (selectedServices.length > 0 && employees && employees.length > 0) {
-          const barber = employees.find(e => e.id === selectedBarber);
-          if (barber && barber.services && Array.isArray(barber.services)) {
-            const service = barber.services.find(s => s.id === selectedServices[0]);
-            if (service && service.duration) {
-              selectedServiceDuration = service.duration;
-            }
-          }
-        }
+      case "time":
         return (
           <div className="h-full flex flex-col">
             <div className="flex-1 pb-20">
               <TimeBooking
-                selectedDate={selectedDate}
-                selectedTime={selectedTime}
-                selectedBarber={selectedBarber}
+                selectedDate={bookingData.selectedDate}
+                selectedTime={bookingData.selectedTime}
+                selectedBarber={bookingData.selectedBarber}
                 serviceDuration={selectedServiceDuration}
                 onTimeSelect={handleTimeSelect}
                 onBack={handleBack}
               />
             </div>
           </div>
-        );
-      }
+        )
       case "confirmation":
         return (
           <div className="h-full flex flex-col">
             <div className="flex-1 pb-20">
               <BookingConfirmation
-                selectedBarber={selectedBarber}
-                selectedServiceIds={selectedServices}
-                selectedDate={selectedDate}
-                selectedTime={selectedTime}
+                selectedBarber={bookingData.selectedBarber}
+                selectedServiceIds={bookingData.selectedServices}
+                selectedDate={bookingData.selectedDate}
+                selectedTime={bookingData.selectedTime}
                 employees={employees}
                 onBack={handleBack}
               />
@@ -321,7 +346,13 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
           </div>
         )
       case "success":
-        return <BookingSuccess bookingRef={bookingReference ?? ""} onNewBooking={handleNewBooking} onClose={handleCloseSuccess} />
+        return (
+          <BookingSuccess
+            bookingRef={bookingReference ?? ""}
+            onNewBooking={handleNewBooking}
+            onClose={handleClose}
+          />
+        )
       default:
         return null
     }
@@ -347,7 +378,7 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
             {/* Fixed Continue button at the bottom */}
             {currentStep !== "success" && currentStep !== "processing" && (
               <AnimatePresence>
-                {isContinueEnabled() && (
+                {isContinueEnabled && (
                   <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -359,7 +390,7 @@ export default function BookingApp({ employees, onClose }: { employees: Barber[]
                       className="w-full px-6 py-3 bg-primary text-white rounded-2xl shadow-lg font-medium"
                       onClick={handleContinue}
                     >
-                      {getContinueLabel()}
+                      {getContinueLabel}
                     </button>
                   </motion.div>
                 )}
