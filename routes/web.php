@@ -31,11 +31,14 @@ Route::post('/appointments/book-appointment', [AppointmentController::class, 'st
 Route::get('/my-appointments', [AppointmentController::class, 'index'])->name('my-appointments');
 
 
-Route::resource('employees', EmployeeController::class)->only(['index','store','update']);
-Route::post('/delete-employees', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+Route::group(['middleware' => ['role:admin']], function () {
+    Route::resource('employees', EmployeeController::class)->only(['index', 'store', 'update']);
+    Route::post('/delete-employees', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 
-Route::resource('clients', ClientController::class)->only(['index','store','update']);
-Route::post('/delete-clients', [ClientController::class, 'destroy'])->name('clients.destroy');
+    Route::resource('clients', ClientController::class)->only(['index', 'store', 'update']);
+    Route::post('/delete-clients', [ClientController::class, 'destroy'])->name('clients.destroy');
+});
+
 
 
 require __DIR__ . '/settings.php';

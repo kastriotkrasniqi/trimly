@@ -436,7 +436,7 @@ export default function BookingApp({ employees, onClose }: BookingAppProps) {
                     className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-50"
                   >
                     <button
-                      className="w-full px-6 py-3 bg-primary text-white rounded-2xl shadow-lg font-medium"
+                      className="w-full max-w-sm mx-auto block px-6 py-3 bg-primary text-white rounded-2xl shadow-lg font-medium"
                       onClick={handleContinue}
                     >
                       {getContinueLabel}

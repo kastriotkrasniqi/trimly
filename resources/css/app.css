@@ -41,7 +41,7 @@
     --sidebar-accent-foreground: oklch(0.6723 0.1606 244.9955);
     --sidebar-border: oklch(0.9271 0.0101 238.5177);
     --sidebar-ring: oklch(0.6818 0.1584 243.354);
-    --font-sans: Open Sans, sans-serif;
+    --font-sans: 'Open Sans', sans-serif;
     --font-serif: Georgia, serif;
     --font-mono: Menlo, monospace;
     --radius: 1.3rem;
@@ -90,7 +90,7 @@
     --sidebar-accent-foreground: oklch(0.6692 0.1607 245.011);
     --sidebar-border: oklch(0.3795 0.022 240.5943);
     --sidebar-ring: oklch(0.6818 0.1584 243.354);
-    --font-sans: Open Sans, sans-serif;
+    --font-sans: 'Open Sans', sans-serif;
     --font-serif: Georgia, serif;
     --font-mono: Menlo, monospace;
     --radius: 1.3rem;
@@ -155,6 +155,24 @@
     --shadow-lg: var(--shadow-lg);
     --shadow-xl: var(--shadow-xl);
     --shadow-2xl: var(--shadow-2xl);
+    --animate-marquee: marquee var(--duration) infinite linear;
+    --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes marquee {
+  from {
+    transform: translateX(0);
+        }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+        }
+    }
+  @keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+        }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+        }
+    }
 }
 
 @layer base {
@@ -164,5 +182,54 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+
+    /* Custom gradient for primary accents */
+    .primary-gradient {
+        background: linear-gradient(135deg, var(--primary), hsl(from var(--primary) h s calc(l * 0.9)));
+    }
+
+    /* Custom text shadow for premium feel */
+    .text-shadow-primary {
+        text-shadow: 0 2px 4px hsl(from var(--primary) h s l / 0.3);
+    }
+
+    /* Custom box shadow for cards */
+    .card-shadow-primary {
+        box-shadow:
+            0 4px 20px hsl(from var(--primary) h s l / 0.1),
+            0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Smooth scroll behavior */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbar for webkit browsers */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #1f2937;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: hsl(from var(--primary) h s calc(l * 0.9));
+    }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
     }
 }
