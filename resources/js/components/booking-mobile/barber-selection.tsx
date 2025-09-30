@@ -67,9 +67,12 @@ export default function BarberSelection({
                 <div className="p-2 text-center space-y-3">
                   <div className="flex justify-center">
                     <img
-                      src={barber.image || "/placeholder.svg"}
-                      alt={barber.user.name}
+                      src={barber.avatar || `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23f3f4f6"/><text x="32" y="38" text-anchor="middle" font-size="12" fill="%236b7280">${barber.user?.name?.split(' ').map(n => n[0]).join('') || 'N/A'}</text></svg>`}
+                      alt={barber.user?.name || 'Barber'}
                       className="w-16 h-16 rounded-lg object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23f3f4f6"/><text x="32" y="38" text-anchor="middle" font-size="12" fill="%236b7280">${barber.user?.name?.split(' ').map(n => n[0]).join('') || 'N/A'}</text></svg>`;
+                      }}
                     />
                   </div>
                   <div>

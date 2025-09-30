@@ -2,9 +2,9 @@ import { User } from ".";
 
 export interface Barber {
   id: string;
-  user: User[];
-  email: string;
-  phone: number;
+  user: User;
+  phone: string;
+  avatar?: string;
   services?: Service[];
 }
 

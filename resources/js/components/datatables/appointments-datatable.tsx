@@ -91,6 +91,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+import { usePage } from "@inertiajs/react"
 import { index as appointmentsApi }  from "@/actions/App/Http/Controllers/API/AppointmentController"
 import { Service,Client } from "@/types/booking"
 
@@ -98,6 +99,18 @@ type Item = {
   id: string;
   name: string;
   client?: [];
+  employee?: {
+    id: number;
+    name: string;
+    phone?: string;
+    avatar?: string;
+    specialties?: string[];
+    user?: {
+      id: number;
+      name: string;
+      email: string;
+    };
+  };
   services?: Array<Service>;
   price?: string;
   status?: string;
@@ -175,6 +188,28 @@ const columns: ColumnDef<Item>[] = [
       };
       const a = getClientName(rowA.original.client);
       const b = getClientName(rowB.original.client);
+      return a.localeCompare(b);
+    },
+  },
+  {
+    header: "Employee",
+    accessorKey: "employee",
+    cell: ({ row }) => {
+      const employee = row.original.employee;
+      if (!employee) return "";
+      return (
+        <div>
+          <div>{employee.name ?? ""}</div>
+          {employee.phone && (
+            <div className="text-xs text-muted-foreground">{employee.phone}</div>
+          )}
+        </div>
+      );
+    },
+    size: 180,
+    sortingFn: (rowA, rowB) => {
+      const a = rowA.original.employee?.name?.toLowerCase() ?? "";
+      const b = rowB.original.employee?.name?.toLowerCase() ?? "";
       return a.localeCompare(b);
     },
   },
@@ -258,6 +293,7 @@ export function AppointmentsDatatable() {
     },
   ])
 
+  const { auth } = usePage().props as any;
   const [data, setData] = useState<Item[]>([]);
   // Global filter state for server-side search
   const [globalFilter, setGlobalFilter] = useState("");
@@ -291,13 +327,12 @@ export function AppointmentsDatatable() {
       const res = await fetch(`${appointmentsApi.url()}?page=${page}&per_page=${perPage}${search}`);
       const appointments = await res.json();
       console.log("Fetched appointments:", appointments);
+      console.log('AAAAAAAAAA');
       setData(appointments.data ?? []);
       setTotalRows(appointments.meta?.total ?? 0);
     }
     fetchAppointments();
-  }, [pagination.pageIndex, pagination.pageSize, debouncedGlobalFilter]);
-
-  const handleDeleteRows = () => {
+  }, [pagination.pageIndex, pagination.pageSize, debouncedGlobalFilter, auth.user]);  const handleDeleteRows = () => {
     const selectedRows = table.getSelectedRowModel().rows
     const updatedData = data.filter(
       (item) => !selectedRows.some((row) => row.original.id === item.id)

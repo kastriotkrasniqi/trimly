@@ -11,18 +11,18 @@ enum UserRole: string
     public function label(): string
     {
         return match ($this) {
-            UserRole::ADMIN => 'Administrator',
-            UserRole::CLIENT => 'Client',
-            UserRole::EMPLOYEE => 'Employee',
+            static::ADMIN => 'Administrator',
+            static::CLIENT => 'Client',
+            static::EMPLOYEE => 'Employee',
         };
     }
 
     public function color(): string
     {
         return match ($this) {
-            UserRole::ADMIN => 'red',
-            UserRole::CLIENT => 'blue',
-            UserRole::EMPLOYEE => 'green',
+            static::ADMIN => 'red',
+            static::CLIENT => 'blue',
+            static::EMPLOYEE => 'green',
         };
     }
 

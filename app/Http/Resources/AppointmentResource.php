@@ -19,6 +19,18 @@ class AppointmentResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'client' => $this->metadata['client'] ?? null,
+            'employee' => $this->when($this->schedulable, [
+                'id' => $this->schedulable->id,
+                'name' => $this->schedulable->user->name ?? null,
+                'phone' => $this->schedulable->phone ?? null,
+                'avatar' => $this->schedulable->avatar ?? null,
+                'specialties' => $this->schedulable->specialties ?? null,
+                'user' => $this->when($this->schedulable->user, [
+                    'id' => $this->schedulable->user->id,
+                    'name' => $this->schedulable->user->name,
+                    'email' => $this->schedulable->user->email,
+                ]),
+            ]),
             'services' => $this->metadata['services'] ?? null,
             'price' => $this->when(isset($this->metadata['price']), $this->metadata['price']),
             'status' => $this->when(isset($this->metadata['status']), $this->metadata['status']),
@@ -28,7 +40,7 @@ class AppointmentResource extends JsonResource
                 'end_time' => $this->periods->first()->end_time,
             ] : null,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
-            ];
+            'updated_at' => $this->updated_at,
+        ];
     }
 }

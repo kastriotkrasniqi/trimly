@@ -15,19 +15,23 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
         $this->call([
-            // EmployeeSeeder::class,
-            // ClientSeeder::class,
             PermissionSeeder::class,
-            // ServiceSeeder::class,
-            // ScheduleSeeder::class,
+            EmployeeSeeder::class,
+            ClientSeeder::class,
+            ServiceSeeder::class,
+            EmployeeServiceSeeder::class,
+            ScheduleSeeder::class,
             // AppointmentSeeder::class,
-            // EmployeeServiceSeeder::class, // Attach services to employees
         ]);
+
+        $user = User::factory()->create([
+            'name' => 'Kastriot',
+            'email' => 'krasniqikastriot01@gmail.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        $user->assignRole('admin');
+
     }
 }

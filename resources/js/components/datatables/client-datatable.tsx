@@ -92,10 +92,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { index as employeesApi } from "@/actions/App/Http/Controllers/API/EmployeeController"
-import { update as updateEmployeesApi } from "@/actions/App/Http/Controllers/EmployeeController"
-import { store as storeEmployeesApi } from "@/actions/App/Http/Controllers/EmployeeController"
-import { destroy as destroyEmployeesApi } from "@/actions/App/Http/Controllers/EmployeeController"
+import { index as clientsApi } from "@/actions/App/Http/Controllers/API/ClientController"
+import { update as updateClientsApi } from "@/actions/App/Http/Controllers/ClientController"
+import { store as storeClientsApi } from "@/actions/App/Http/Controllers/ClientController"
+import { destroy as destroyClientsApi } from "@/actions/App/Http/Controllers/ClientController"
 import { usePage, useForm, router } from "@inertiajs/react"
 import { User } from "@/types"
 import { Service } from "@/types/booking"
@@ -337,7 +337,7 @@ function AddEmployeeButton({ onRefresh }: { onRefresh: () => void }) {
             formData.append('avatar', data.avatar);
         }
 
-        router.post('/employees', formData, {
+        router.post('/clients', formData, {
             preserveScroll: true,
             onSuccess: () => {
                 setOpen(false);
@@ -349,7 +349,7 @@ function AddEmployeeButton({ onRefresh }: { onRefresh: () => void }) {
         <>
             <Button className="ml-auto" variant="outline" onClick={() => setOpen(true)}>
                 <PlusIcon className="-ms-1 opacity-60" size={16} aria-hidden="true" />
-                Add Employee
+                Add Client
             </Button>
 
             <EmployeeModal
@@ -360,7 +360,7 @@ function AddEmployeeButton({ onRefresh }: { onRefresh: () => void }) {
                 onSubmit={handleSubmit}
                 processing={processing}
                 errors={errors}
-                title="Add Employee"
+                title="Add Client"
                 currentAvatar={undefined}
             />
         </>
@@ -429,15 +429,15 @@ const columns: ColumnDef<Item>[] = [
     size: 60,
   },
   {
-    header: "Services",
-    accessorKey: "services",
-    cell: ({ row }) => Array.isArray(row.original.services) ? row.original.services.map(s => s.name).join(", ") : "",
+    header: "Email",
+    accessorKey: "user.email",
+    cell: ({ row }) => <div className="text-sm text-gray-600">{row.original.user?.email ?? ""}</div>,
+    size: 200,
     sortingFn: (rowA, rowB) => {
-      const a = Array.isArray(rowA.original.services) ? rowA.original.services.map(s => s.name).join(", ") : "";
-      const b = Array.isArray(rowB.original.services) ? rowB.original.services.map(s => s.name).join(", ") : "";
+      const a = `${rowA.original.user?.email ?? ""}`.toLowerCase();
+      const b = `${rowB.original.user?.email ?? ""}`.toLowerCase();
       return a.localeCompare(b);
     },
-    size: 200,
   },
   {
     id: "actions",
@@ -499,25 +499,25 @@ export function Datatable() {
   }, [debouncedGlobalFilter]);
 
   useEffect(() => {
-    async function fetchEmployees() {
+    async function fetchClients() {
       const page = pagination.pageIndex + 1;
       const perPage = pagination.pageSize;
       const search = debouncedGlobalFilter ? `&search=${encodeURIComponent(debouncedGlobalFilter)}` : "";
-      const res = await fetch(`${employeesApi.url()}?page=${page}&per_page=${perPage}${search}`);
-      const employees = await res.json();
-      setData(employees.data ?? []);
-      setTotalRows(employees.meta?.total ?? 0);
+      const res = await fetch(`${clientsApi.url()}?page=${page}&per_page=${perPage}${search}`);
+      const clients = await res.json();
+      setData(clients.data ?? []);
+      setTotalRows(clients.meta?.total ?? 0);
     }
-    fetchEmployees();
+    fetchClients();
   }, [pagination.pageIndex, pagination.pageSize, debouncedGlobalFilter, auth.user, refreshTrigger]);
 
-  // Delete selected employees by sending their IDs to the backend
+  // Delete selected clients by sending their IDs to the backend
   const handleDeleteRows = () => {
     const selectedRows = table.getSelectedRowModel().rows;
 
     const ids = selectedRows.map((row) => row.original.id);
     if (ids.length === 0) return;
-    router.post(destroyEmployeesApi.url(), { ids }, {
+    router.post(destroyClientsApi.url(), { ids }, {
       preserveScroll: true,
       onSuccess: () => {
         table.resetRowSelection();
@@ -661,8 +661,8 @@ export function Datatable() {
                       This action cannot be undone. This will permanently delete{" "}
                       {table.getSelectedRowModel().rows.length} selected{" "}
                       {table.getSelectedRowModel().rows.length === 1
-                        ? "employee"
-                        : "employees"}
+                        ? "client"
+                        : "clients"}
                       .
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -928,7 +928,7 @@ function RowActions({ row, table, onRefresh }: { row: Row<Item>; table: any; onR
       formData.append('avatar', data.avatar);
       formData.append('_method', 'PUT');
 
-      router.post(`/employees/${row.original.id}`, formData, {
+      router.post(`/clients/${row.original.id}`, formData, {
         preserveScroll: true,
         onSuccess: () => {
           reset();
@@ -941,7 +941,7 @@ function RowActions({ row, table, onRefresh }: { row: Row<Item>; table: any; onR
       });
     } else {
       // Use regular PUT for non-file updates
-      put(updateEmployeesApi.url(row.original.id), {
+      put(updateClientsApi.url(row.original.id), {
         onSuccess: () => {
           reset();
           setEditOpen(false);
@@ -956,7 +956,7 @@ function RowActions({ row, table, onRefresh }: { row: Row<Item>; table: any; onR
 
   const handleDeleteSingle = () => {
     const ids = [row.original.id];
-    router.post(destroyEmployeesApi.url(), { ids }, {
+    router.post(destroyClientsApi.url(), { ids }, {
       preserveScroll: true,
       onSuccess: () => {
         onRefresh(); // Trigger data refresh

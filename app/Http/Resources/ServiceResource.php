@@ -20,6 +20,22 @@ class ServiceResource extends JsonResource
             'description' => $this->description,
             'price' => number_format($this->price, 2),
             'duration' => $this->duration,
+            'employees' => $this->when($this->relationLoaded('employees'),
+                $this->employees->map(function ($employee) {
+                    return [
+                        'id' => $employee->id,
+                        'name' => $employee->user->name ?? null,
+                        'phone' => $employee->phone ?? null,
+                        'avatar' => $employee->avatar ?? null,
+                        'specialties' => $employee->specialties ?? null,
+                        'user' => $this->when($employee->relationLoaded('user'), [
+                            'id' => $employee->user->id,
+                            'name' => $employee->user->name,
+                            'email' => $employee->user->email,
+                        ]),
+                    ];
+                })
+            ),
         ];
     }
 }

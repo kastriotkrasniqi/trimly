@@ -91,6 +91,18 @@ type Item = {
     description?: string;
     price?: string;
     duration?: string;
+    employees?: Array<{
+        id: number;
+        name: string;
+        phone?: string;
+        avatar?: string;
+        specialties?: string[];
+        user?: {
+            id: number;
+            name: string;
+            email: string;
+        };
+    }>;
     created_at?: string;
     updated_at?: string;
 };
@@ -311,6 +323,13 @@ function RowActions({ row }: { row: Row<Item> }) {
         });
     };
 
+    const handleDeleteSingle = (handleDeleteRows: () => void, table: any) => {
+        // Select only this row
+        table.setRowSelection({ [row.id]: true });
+        // Use the existing delete function
+        handleDeleteRows();
+    };
+
     return (
         <>
             <DropdownMenu>
@@ -334,7 +353,10 @@ function RowActions({ row }: { row: Row<Item> }) {
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive focus:text-destructive">
+                    <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => handleDeleteSingle(row.handleDeleteRows, row.table)}
+                    >
                         <TrashIcon size={16} className="mr-2" />
                         <span>Delete</span>
                     </DropdownMenuItem>
@@ -399,6 +421,36 @@ const columns: ColumnDef<Item>[] = [
         enableHiding: false,
     },
     {
+        header: "Employees",
+        accessorKey: "employees",
+        cell: ({ row }) => {
+            const employees = row.original.employees;
+            if (!employees || employees.length === 0) return "";
+            return (
+                <div className="space-y-1">
+                    {employees.map((employee, index) => (
+                        <div key={employee.id || index} className="text-sm">
+                            <div>{employee.name || ""}</div>
+                            {employee.phone && (
+                                <div className="text-xs text-muted-foreground">{employee.phone}</div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+        },
+        size: 180,
+        sortingFn: (rowA, rowB) => {
+            const getFirstEmployeeName = (employees) => {
+                if (!employees || employees.length === 0) return "";
+                return employees[0].name?.toLowerCase() || "";
+            };
+            const a = getFirstEmployeeName(rowA.original.employees);
+            const b = getFirstEmployeeName(rowB.original.employees);
+            return a.localeCompare(b);
+        },
+    },
+    {
         header: "Price",
         accessorKey: "price",
         cell: ({ row }) => {
@@ -423,7 +475,25 @@ const columns: ColumnDef<Item>[] = [
     {
         id: "actions",
         header: () => <span className="sr-only">Actions</span>,
-        cell: ({ row }) => <RowActions row={row} />,
+        cell: ({ row, table }) => {
+            // Create a modified row object with the needed functions
+            const rowWithActions = {
+                ...row,
+                table,
+                handleDeleteRows: () => {
+                    // Select only this row
+                    table.setRowSelection({ [row.id]: true });
+                    // Trigger the delete dialog by finding and clicking the delete button
+                    setTimeout(() => {
+                        const deleteButton = document.querySelector('[data-delete-trigger]') as HTMLButtonElement;
+                        if (deleteButton) {
+                            deleteButton.click();
+                        }
+                    }, 0);
+                }
+            };
+            return <RowActions row={rowWithActions} />;
+        },
         size: 60,
         enableHiding: false,
     },
@@ -477,7 +547,7 @@ export function ServicesDatatable() {
             const page = pagination.pageIndex + 1;
             const perPage = pagination.pageSize;
             const search = debouncedGlobalFilter ? `&search=${encodeURIComponent(debouncedGlobalFilter)}` : "";
-            const res = await fetch(`${servicesApi.url(auth.user)}?page=${page}&per_page=${perPage}${search}`);
+            const res = await fetch(`${servicesApi.url()}?page=${page}&per_page=${perPage}${search}`);
             const services = await res.json();
             setData(services.data ?? []);
             setTotalRows(services.meta?.total ?? 0);
@@ -608,7 +678,7 @@ export function ServicesDatatable() {
                     {table.getSelectedRowModel().rows.length > 0 && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button className="ml-auto" variant="outline">
+                                <Button className="ml-auto" variant="outline" data-delete-trigger>
                                     <TrashIcon
                                         className="-ms-1 opacity-60"
                                         size={16}

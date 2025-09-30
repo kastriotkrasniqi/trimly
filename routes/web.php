@@ -6,15 +6,15 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SlotController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
@@ -31,7 +31,11 @@ Route::post('/appointments/book-appointment', [AppointmentController::class, 'st
 Route::get('/my-appointments', [AppointmentController::class, 'index'])->name('my-appointments');
 
 
-Route::resource('employees', EmployeeController::class);
+Route::resource('employees', EmployeeController::class)->only(['index','store','update']);
+Route::post('/delete-employees', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+
+Route::resource('clients', ClientController::class)->only(['index','store','update']);
+Route::post('/delete-clients', [ClientController::class, 'destroy'])->name('clients.destroy');
 
 
 require __DIR__ . '/settings.php';

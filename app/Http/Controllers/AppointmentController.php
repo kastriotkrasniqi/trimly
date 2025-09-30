@@ -44,7 +44,7 @@ class AppointmentController extends Controller
                 ->withMetadata([
                     'client' => $client,
                     'services' => $services,
-                    'price' => $request->price,
+                    'price' => number_format($request->price,2),
                     'status' => 'confirmed',
                     'reference' => Str::ulid(),
                 ])->save();

@@ -18,8 +18,8 @@ class EmployeeResource extends JsonResource
             'id' => $this->id,
             'user' => $this->user,
             'phone' => $this->phone,
+            'avatar' => $this->avatar ? asset('storage/' . $this->avatar) : null,
             'services' => ServiceResource::collection($this->whenLoaded('services')),
-            'image' => $this->avatar,
          ];
     }
 }

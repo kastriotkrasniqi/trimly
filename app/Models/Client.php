@@ -13,7 +13,9 @@ class Client extends Model
     protected $fillable = [
         'user_id',
         'phone',
+        'avatar',
     ];
+
     /**
      * Get the user that owns the client.
      */

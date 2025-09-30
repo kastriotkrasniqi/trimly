@@ -14,6 +14,11 @@ class EmployeeController extends Controller
      */
     public function index()
     {
+        // Check if user has admin role
+        if (!auth()->user() || !auth()->user()->hasRole('admin')) {
+            return response()->json(['error' => 'Unauthorized access'], 403);
+        }
+
         $perPage = request('per_page', 10);
         $query = Employee::with('services', 'user');
         $search = request('search');
