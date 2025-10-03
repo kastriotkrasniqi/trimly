@@ -78,7 +78,7 @@ export default function BookingSuccess({ bookingRef, onNewBooking, onClose }: Bo
                     >
                         Book Another Appointment
                     </Button>
-                    <Button variant="outline" className="w-full h-12 bg-transparent">
+                    <Button variant="outline" className="w-full h-12 bg-transparent text-foreground">
                         View My Bookings
                     </Button>
                 </div>

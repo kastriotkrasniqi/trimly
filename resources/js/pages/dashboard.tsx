@@ -6,7 +6,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AnimatedNumber } from '@/components/core/animated-number';
+import { NumberTicker } from '@/components/ui/number-ticker';
 import { Calendar, Users, Scissors, DollarSign, TrendingUp, Clock, CheckCircle, UserCheck } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -70,13 +70,10 @@ export default function Dashboard() {
                                 <Users className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <AnimatedNumber
+                                <NumberTicker
                                     value={stats.overview.total_clients}
                                     className="text-2xl font-bold"
-                                    springOptions={{
-                                        bounce: 0.2,
-                                        duration: 1500,
-                                    }}
+                                    delay={0.1}
                                 />
                                 <p className="text-xs text-muted-foreground">Registered clients</p>
                             </CardContent>
@@ -90,13 +87,10 @@ export default function Dashboard() {
                                 <UserCheck className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <AnimatedNumber
+                                <NumberTicker
                                     value={stats.overview.active_employees}
                                     className="text-2xl font-bold"
-                                    springOptions={{
-                                        bounce: 0.2,
-                                        duration: 1600,
-                                    }}
+                                    delay={0.2}
                                 />
                                 <p className="text-xs text-muted-foreground">
                                     of {stats.overview.total_employees} total
@@ -113,13 +107,10 @@ export default function Dashboard() {
                             <Scissors className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <AnimatedNumber
+                            <NumberTicker
                                 value={stats.overview.total_services}
                                 className="text-2xl font-bold"
-                                springOptions={{
-                                    bounce: 0.2,
-                                    duration: 1700,
-                                }}
+                                delay={0.3}
                             />
                             <p className="text-xs text-muted-foreground">
                                 {isEmployee ? 'Services you offer' : 'Available services'}
@@ -135,13 +126,10 @@ export default function Dashboard() {
                             <Calendar className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <AnimatedNumber
+                            <NumberTicker
                                 value={stats.overview.total_appointments}
                                 className="text-2xl font-bold"
-                                springOptions={{
-                                    bounce: 0.2,
-                                    duration: 1800,
-                                }}
+                                delay={0.4}
                             />
                             <p className="text-xs text-muted-foreground">
                                 {isEmployee ? 'Your appointments' : 'All time'}
@@ -158,13 +146,10 @@ export default function Dashboard() {
                             <Clock className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <AnimatedNumber
+                            <NumberTicker
                                 value={stats.appointments.today}
                                 className="text-2xl font-bold"
-                                springOptions={{
-                                    bounce: 0.3,
-                                    duration: 1200,
-                                }}
+                                delay={0.5}
                             />
                             <p className="text-xs text-muted-foreground">Appointments</p>
                         </CardContent>
@@ -177,13 +162,10 @@ export default function Dashboard() {
                             <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <AnimatedNumber
+                            <NumberTicker
                                 value={stats.appointments.this_week}
                                 className="text-2xl font-bold"
-                                springOptions={{
-                                    bounce: 0.3,
-                                    duration: 1300,
-                                }}
+                                delay={0.6}
                             />
                             <p className="text-xs text-muted-foreground">Appointments</p>
                         </CardContent>
@@ -196,15 +178,14 @@ export default function Dashboard() {
                             <DollarSign className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <AnimatedNumber
-                                value={stats.revenue.this_week}
-                                className="text-2xl font-bold"
-                                format={(value) => `$${value.toFixed(2)}`}
-                                springOptions={{
-                                    bounce: 0.1,
-                                    duration: 2000,
-                                }}
-                            />
+                            <div className="text-2xl font-bold">
+                                $<NumberTicker
+                                    value={stats.revenue.this_week}
+                                    className="text-2xl font-bold"
+                                    decimalPlaces={2}
+                                    delay={0.7}
+                                />
+                            </div>
                             <p className="text-xs text-muted-foreground">This week</p>
                         </CardContent>
                     </Card>
@@ -216,15 +197,14 @@ export default function Dashboard() {
                             <DollarSign className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <AnimatedNumber
-                                value={stats.revenue.this_month}
-                                className="text-2xl font-bold"
-                                format={(value) => `$${value.toFixed(2)}`}
-                                springOptions={{
-                                    bounce: 0.1,
-                                    duration: 2100,
-                                }}
-                            />
+                            <div className="text-2xl font-bold">
+                                $<NumberTicker
+                                    value={stats.revenue.this_month}
+                                    className="text-2xl font-bold"
+                                    decimalPlaces={2}
+                                    delay={0.8}
+                                />
+                            </div>
                             <p className="text-xs text-muted-foreground">This month</p>
                         </CardContent>
                     </Card>

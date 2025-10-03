@@ -49,22 +49,17 @@ class ScheduleController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-
-    }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreScheduleRequest $request, Employee $employee)
+    public function store(StoreScheduleRequest $request)
     {
         sleep(1); // Simulate processing delay for better UX feedback
 
         $request->validated();
+
+        $employee = auth()->user()->employee;
 
         try {
             $service = app(WeeklyScheduleService::class);
@@ -92,37 +87,5 @@ class ScheduleController extends Controller
         } catch (\Throwable $th) {
             return back()->withErrors(['error' => 'An error occurred while updating availability: ' . $th->getMessage()]);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

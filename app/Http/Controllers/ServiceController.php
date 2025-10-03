@@ -18,13 +18,6 @@ class ServiceController extends Controller
         return Inertia::render('services/index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -45,21 +38,7 @@ class ServiceController extends Controller
         return redirect()->back()->with('success', 'Service created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Service $service)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Service $service)
-    {
-
-    }
 
     /**
      * Update the specified resource in storage.

@@ -75,7 +75,7 @@ import { getServicesByEmployee } from "@/actions/App/Http/Controllers/ServiceCon
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute left-4 bg-gray-100 rounded-full"
+                            className="absolute left-4 bg-gray-100 rounded-full text-gray-400"
                             onClick={onBack}
                         >
                             <ChevronLeft className="h-8 w-8" />

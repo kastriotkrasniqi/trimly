@@ -17,13 +17,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
-Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
-Route::post('/schedule/{employee}', [ScheduleController::class, 'store'])->name('schedule.store');
+Route::group(['middleware' => ['permission:view schedule']], function () {
+    Route::resource('schedule', ScheduleController::class)->only(['index', 'store']);
+});
 
-Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
-Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
-Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update');
-Route::post('/delete-services', [ServiceController::class, 'destroy'])->name('services.destroy');
+Route::group(['middleware' => ['permission:create services']], function () {
+    Route::resource('services', ServiceController::class)->only(['index', 'store', 'update']);
+    Route::post('/delete-services', [ServiceController::class, 'destroy'])->name('services.destroy');
+});
+
 Route::get('/services/{employee}', [ServiceController::class, 'getServicesByEmployee']);
 Route::get('/available-slots/{employee}', [SlotController::class, 'getAvailableSlots']);
 
@@ -31,13 +33,16 @@ Route::post('/appointments/book-appointment', [AppointmentController::class, 'st
 Route::get('/my-appointments', [AppointmentController::class, 'index'])->name('my-appointments');
 
 
-Route::group(['middleware' => ['role:admin']], function () {
+Route::group(['middleware' => ['permission:view employees']], function () {
     Route::resource('employees', EmployeeController::class)->only(['index', 'store', 'update']);
-    Route::post('/delete-employees', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-
-    Route::resource('clients', ClientController::class)->only(['index', 'store', 'update']);
-    Route::post('/delete-clients', [ClientController::class, 'destroy'])->name('clients.destroy');
+    Route::post('/delete-employees', [EmployeeController::class, 'destroy'])->name('employees.destroy')->middleware(['permission:delete employees']);
 });
+
+Route::group(['middleware' => ['permission:view clients']], function () {
+    Route::resource('clients', ClientController::class)->only(['index', 'store', 'update']);
+    Route::post('/delete-clients', [ClientController::class, 'destroy'])->name('clients.destroy')->middleware(['permission:delete clients']);
+});
+
 
 
 

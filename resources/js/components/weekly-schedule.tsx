@@ -91,7 +91,6 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
 }) {
 
 
-  const auth = usePage().props.auth;
   // Check if there are existing schedules
   const hasExistingSchedules = initialSchedules && Object.keys(initialSchedules).length > 0
 
@@ -188,7 +187,7 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
         }
       }
     })
-    post(store.url(auth.user.id))
+    post(store.url())
   }
 
   const handleReset = () => {

@@ -32,10 +32,18 @@ class PermissionSeeder extends Seeder
             'edit appointments',
             'delete appointments',
             'create appointments',
-            'view users',
-            'create users',
-            'edit users',
-            'delete users',
+            'view employees',
+            'create employees',
+            'edit employees',
+            'delete employees',
+            'view clients',
+            'create clients',
+            'edit clients',
+            'delete clients',
+            'create schedule',
+            'view schedule',
+            'edit schedule',
+            'delete schedule',
         ];
 
         foreach ($permissions as $permission) {

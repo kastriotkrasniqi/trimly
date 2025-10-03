@@ -433,10 +433,10 @@ export default function BookingApp({ employees, onClose }: BookingAppProps) {
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 100, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                    className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-50"
+                    className="fixed bottom-0 left-0 right-0 p-6 z-50"
                   >
                     <button
-                      className="w-full max-w-sm mx-auto block px-6 py-3 bg-primary text-white rounded-2xl shadow-lg font-medium"
+                      className="w-full max-w-sm mx-auto block px-6 py-4 bg-primary text-white rounded-2xl shadow-lg font-medium md:mb-6"
                       onClick={handleContinue}
                     >
                       {getContinueLabel}
