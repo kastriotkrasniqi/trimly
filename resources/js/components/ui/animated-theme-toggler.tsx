@@ -6,9 +6,10 @@ import { cn } from "@/lib/utils"
 
 type Props = {
   className?: string
+  label?: string
 }
 
-export const AnimatedThemeToggler = ({ className }: Props) => {
+export const AnimatedThemeToggler = ({ className, label }: Props) => {
   const [isDark, setIsDark] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -65,8 +66,11 @@ export const AnimatedThemeToggler = ({ className }: Props) => {
   }, [isDark])
 
   return (
-    <button ref={buttonRef} onClick={toggleTheme} className={cn(className)}>
-      {isDark ? <Sun /> : <Moon />}
+    <button ref={buttonRef} onClick={toggleTheme} className={cn("w-full", className)}>
+      {label && <span className="flex-1 text-left">{label}</span>}
+      <span className={label ? "flex-shrink-0" : ""}>
+        {isDark ? <Sun /> : <Moon />}
+      </span>
     </button>
   )
 }

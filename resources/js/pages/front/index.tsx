@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Scissors, Menu, X, Star, MapPin, Phone, MessageCircle, Clock, Users, Award, Sparkles, ChevronUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import {
   ScrollVelocityContainer,
   ScrollVelocityRow,
@@ -9,10 +9,11 @@ import { cn } from '@/lib/utils';
 import BookingApp from '@/pages/mobile-appointment';
 import { Barber } from '@/types/booking';
 import { Head } from '@inertiajs/react';
-import { BorderBeam } from '@/components/ui/border-beam';
 import { AnimatedThemeToggler } from '@/components/ui/animated-theme-toggler';
 import { LineShadowText } from '@/components/ui/line-shadow-text';
+import { AnimatedText } from '@/components/ui/animated-text';
 import TeamSection from '@/components/TeamSection';
+import AnimatedHeader from '@/components/AnimatedHeader';
 import { services ,type Service} from '@/data/services';
 import { testimonials,firstRow,secondRow, type Testimonial } from '@/data/testimonials';
 
@@ -74,6 +75,18 @@ export default function HomePage({ employees }: HomePageProps) {
   const [showBooking, setShowBooking] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Scroll animation refs
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, 50]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1.02, 1.05]);
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, -25]);
 
   // Check if user is near bottom of page
   useEffect(() => {
@@ -145,162 +158,321 @@ export default function HomePage({ employees }: HomePageProps) {
         <link rel="canonical" href="/" />
       </Head>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-sans">
-      {/* Header */}
-      <header className="fixed top-0 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg py-4 px-4 md:px-8 flex items-center justify-between z-50">
-        <motion.div
-          className="flex items-center gap-3"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <img src="/img/logo.svg" alt="Trimly Logo" className="h-10 w-10" />
-          <h1 className="text-xl font-bold text-primary font-serif">Trimly Cutz</h1>
-        </motion.div>
+      {/* Header Component */}
+      <AnimatedHeader
+        navOpen={navOpen}
+        setNavOpen={setNavOpen}
+        isDarkMode={isDarkMode}
+        onOpenBooking={handleOpenBooking}
+      />
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-8 text-gray-700 dark:text-white/90 items-center">
-          <a href="#services" className="hover:text-primary transition-colors duration-300">Services</a>
-          <a href="#team" className="hover:text-primary transition-colors duration-300">Our Team</a>
-          <a href="#testimonials" className="hover:text-primary transition-colors duration-300">Reviews</a>
-          <a href="#contact" className="hover:text-primary transition-colors duration-300">Contact</a>
-          <button
-            onClick={handleOpenBooking}
-            className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-all duration-300 font-semibold"
-          >
-            Book Now
-          </button>
-        </nav>
-
-        {/* Mobile Menu Button */}
-                <button
-          className="md:hidden text-gray-700 dark:text-white p-2"
-          onClick={handleToggleNav}
-          aria-label="Toggle navigation"
-        >
-          {navOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </header>
-
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation - Sticky to Header */}
       <AnimatePresence>
         {navOpen && (
           <motion.nav
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-                        className="fixed top-16 left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-6 z-40 md:hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+            className="fixed top-[72px] left-1/2 -translate-x-1/2 z-40 md:hidden overflow-hidden"
+            style={{
+              width: "calc(90vw - 2rem)",
+              maxWidth: "360px"
+            }}
           >
-            <div className="flex flex-col gap-4">
-              <a href="#services" className="text-gray-700 dark:text-white hover:text-primary transition-colors" onClick={() => setNavOpen(false)}>Services</a>
-              <a href="#team" className="text-gray-700 dark:text-white hover:text-primary transition-colors" onClick={() => setNavOpen(false)}>Our Team</a>
-              <a href="#testimonials" className="text-gray-700 dark:text-white hover:text-primary transition-colors" onClick={() => setNavOpen(false)}>Reviews</a>
-              <a href="#contact" className="text-gray-700 dark:text-white hover:text-primary transition-colors" onClick={() => setNavOpen(false)}>Contact</a>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500 dark:text-white/70">Theme</span>
-                <AnimatedThemeToggler />
+            <div
+              className={cn(
+                "backdrop-blur-[50px]",
+                "border-l border-r border-b border-white/[0.08] dark:border-white/[0.05]",
+                "rounded-b-[20px]",
+                "shadow-[0_20px_60px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
+              )}
+              style={{
+                backgroundColor: isDarkMode ? 'rgba(20,20,25,0.92)' : 'rgba(255,255,255,0.88)',
+                backdropFilter: 'blur(40px) saturate(180%)',
+                boxShadow: isDarkMode
+                  ? '0 20px 60px rgba(0,0,0,0.4), 0 8px 25px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  : '0 20px 60px rgba(0,0,0,0.08), 0 8px 25px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)'
+              }}
+            >
+            <motion.div
+              className="p-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif' }}
+            >
+              <div className="flex flex-col gap-1 mb-6">
+                <a href="#services"
+                   className="text-[17px] font-medium text-black/85 dark:text-white/90 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-3 px-4 rounded-[14px] hover:bg-black/[0.04] dark:hover:bg-white/[0.08] active:scale-[0.98]"
+                   onClick={() => setNavOpen(false)}>Services</a>
+                <a href="#team"
+                   className="text-[17px] font-medium text-black/85 dark:text-white/90 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-3 px-4 rounded-[14px] hover:bg-black/[0.04] dark:hover:bg-white/[0.08] active:scale-[0.98]"
+                   onClick={() => setNavOpen(false)}>Our Team</a>
+                <a href="#testimonials"
+                   className="text-[17px] font-medium text-black/85 dark:text-white/90 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-3 px-4 rounded-[14px] hover:bg-black/[0.04] dark:hover:bg-white/[0.08] active:scale-[0.98]"
+                   onClick={() => setNavOpen(false)}>Reviews</a>
+                <a href="#contact"
+                   className="text-[17px] font-medium text-black/85 dark:text-white/90 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-3 px-4 rounded-[14px] hover:bg-black/[0.04] dark:hover:bg-white/[0.08] active:scale-[0.98]"
+                   onClick={() => setNavOpen(false)}>Contact</a>
               </div>
-              <button
-                onClick={handleOpenBooking}
-                className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-all duration-300 font-semibold text-left"
-              >
-                Book Now
-              </button>
+
+              <AnimatedThemeToggler
+                className={cn(
+                  "flex items-center justify-between py-3 px-4 mb-4 rounded-[14px] bg-black/[0.03] dark:bg-white/[0.05]",
+                  "text-[16px] font-medium text-black/70 dark:text-white/70",
+                  "hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all duration-200"
+                )}
+                label="Theme"
+              />
+            </motion.div>
             </div>
           </motion.nav>
         )}
       </AnimatePresence>
 
-      {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/img/hero-bg.jpg')" }}
+      {/* Hero Section - iOS 17+ Inspired */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900">
+        {/* Background Image */}
+        <motion.div
+          className="absolute inset-0"
+          style={{ scale: imageScale, y: imageY }}
         >
-          <div className="absolute inset-0 bg-gray-900/70"></div>
-        </div>
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+            style={{
+              backgroundImage: "url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2074&auto=format&fit=crop')"
+            }}
+          />
+          {/* Enhanced overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/20 dark:from-black/60 dark:via-black/40 dark:to-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/40 via-transparent to-purple-50/40 dark:from-blue-950/40 dark:via-transparent dark:to-purple-950/40"></div>
+        </motion.div>
 
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
-          <motion.h2
-            className="text-5xl md:text-7xl font-bold mb-6 font-serif"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <span className="text-white">Where Style</span>
-            <br />
-            <span className="text-primary">Meets </span>
-            <LineShadowText
-              className="text-primary italic"
-              shadowColor={isDarkMode ? "white" : "black"}
+        {/* Content Container */}
+        <motion.div
+          className="relative z-10 container mx-auto px-6 lg:px-8 pt-24 lg:pt-32"
+          style={{ y: contentY, opacity: contentOpacity }}
+        >
+          <div className="max-w-6xl mx-auto">
+            {/* Main Heading */}
+            <motion.div
+              className="text-center mb-16"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.2 }}
             >
-              Precision
-            </LineShadowText>
-          </motion.h2>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8"
+                  style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif' }}>
+                <span className="block text-gray-900 dark:text-white">
+                  <AnimatedText text="Craft premium" className="text-gray-900 dark:text-white" delay={0.2} />
+                </span>
+                <span className="block text-gray-600 dark:text-gray-300 italic font-light">
+                  <AnimatedText text="barbering experiences" className="text-gray-600 dark:text-gray-300 italic font-light" delay={0.6} />
+                </span>
+              </h1>
 
-          <motion.p
-            className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            Experience the art of traditional barbering with modern sophistication
-          </motion.p>
+              <motion.p
+                className="text-lg md:text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed mb-12"
+                style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif' }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+              >
+                Designed in the heart of the city, crafted to endure — timeless grooming for modern gentlemen.
+              </motion.p>
 
-          <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <button
-              onClick={handleOpenBooking}
-              className="bg-primary text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary/90 transition-all duration-300 transform hover:scale-105"
-            >
-              Book Your Appointment
-            </button>
-            <a
-              href="#services"
-              className="border-2 border-primary text-primary px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300"
-            >
-              View Services
-            </a>
-          </motion.div>
-        </div>
+              {/* Feature Pills */}
+              <motion.div
+                className="flex flex-wrap justify-center gap-3 mb-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+                style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif' }}
+              >
+                <div className={cn(
+                  "flex items-center gap-2.5 px-4 py-2.5 rounded-full",
+                  "bg-white/75 dark:bg-black/60 backdrop-blur-[20px]",
+                  "border border-white/30 dark:border-white/20",
+                  "shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
+                  "hover:bg-white/85 dark:hover:bg-black/70 transition-all duration-300",
+                  "hover:scale-105 active:scale-95"
+                )}>
+                  <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm"></div>
+                  <span className="text-[14px] font-medium text-gray-800 dark:text-gray-200">Walk-ins welcome</span>
+                </div>
+                <div className={cn(
+                  "flex items-center gap-2.5 px-4 py-2.5 rounded-full",
+                  "bg-white/75 dark:bg-black/60 backdrop-blur-[20px]",
+                  "border border-white/30 dark:border-white/20",
+                  "shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
+                  "hover:bg-white/85 dark:hover:bg-black/70 transition-all duration-300",
+                  "hover:scale-105 active:scale-95"
+                )}>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm"></div>
+                  <span className="text-[14px] font-medium text-gray-800 dark:text-gray-200">Expert barbers</span>
+                </div>
+                <div className={cn(
+                  "flex items-center gap-2.5 px-4 py-2.5 rounded-full",
+                  "bg-white/75 dark:bg-black/60 backdrop-blur-[20px]",
+                  "border border-white/30 dark:border-white/20",
+                  "shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
+                  "hover:bg-white/85 dark:hover:bg-black/70 transition-all duration-300",
+                  "hover:scale-105 active:scale-95"
+                )}>
+                  <div className="w-2 h-2 bg-amber-500 rounded-full shadow-sm"></div>
+                  <span className="text-[14px] font-medium text-gray-800 dark:text-gray-200">Premium service</span>
+                </div>
+              </motion.div>
+
+              {/* CTA Button */}
+              <motion.div
+                className="hidden md:flex justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1.0 }}
+              >
+                <button
+                  onClick={handleOpenBooking}
+                  className={cn(
+                    "group relative overflow-hidden",
+                    "bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white",
+                    "text-white dark:text-black px-8 py-4 rounded-[22px] font-semibold text-[17px]",
+                    "shadow-lg dark:shadow-xl",
+                    "hover:scale-105 active:scale-95 transition-all duration-300",
+                    "border border-gray-700/20 dark:border-gray-300/20",
+                    "flex items-center gap-3"
+                  )}
+                  style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif' }}
+                >
+                  <span>Book Your Experience</span>
+                  <motion.div
+                    className="w-5 h-5 flex items-center justify-center"
+                    whileHover={{ x: 3 }}
+                    transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  >
+                    <Scissors className="w-4 h-4" strokeWidth={2.5} />
+                  </motion.div>
+                </button>
+              </motion.div>
+            </motion.div>
+          </div>
+        </motion.div>
       </section>
 
-      {/* Services Section */}
-            <section id="services" className="py-20 bg-gray-100 dark:bg-gray-800">
-        <div className="max-w-6xl mx-auto px-4">
+      {/* Services Section - iOS 17+ Inspired */}
+      <section id="services" className="py-24 lg:py-32 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-6 lg:px-8">
           <motion.div
-            className="text-center mb-16"
+            className="max-w-4xl mb-20"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
+            style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif' }}
           >
-            <h3 className="text-4xl md:text-5xl font-bold mb-4 font-serif text-gray-900 dark:text-white">Our Services</h3>
-            <p className="text-xl text-gray-600 dark:text-gray-400">Premium grooming services for the modern gentleman</p>
+            <h3 className="text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight">
+              Premium services
+            </h3>
+            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+              Meticulously crafted grooming experiences that blend traditional techniques with modern sophistication.
+            </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {services.map((service, index) => (
-              <motion.div
-                key={service.name}
-                className="bg-white dark:bg-gray-900 p-8 rounded-xl text-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 transform hover:scale-105 shadow-md dark:shadow-none"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <div className="text-primary mb-4 flex justify-center">
-                  {service.icon}
-                </div>
-                <h4 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{service.name}</h4>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">{service.description}</p>
-                <p className="text-primary font-semibold text-lg">{service.price}</p>
-              </motion.div>
-            ))}
+          <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
+            {services.map((service, index) => {
+              // Service-specific images for better visual appeal
+              const serviceImages = {
+                'Classic Haircut': 'https://images.unsplash.com/photo-1622286346003-c4b4f0ca3b4e?q=80&w=2073&auto=format&fit=crop',
+                'Beard Trim': 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2074&auto=format&fit=crop',
+                'Hot Shave': 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop',
+                'Hair Styling': 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=2073&auto=format&fit=crop'
+              };
+
+              return (
+                <motion.div
+                  key={service.name}
+                  className={cn(
+                    "group relative aspect-[4/5] overflow-hidden rounded-[28px]",
+                    "bg-white/80 dark:bg-black/60 backdrop-blur-[20px]",
+                    "border border-white/30 dark:border-white/10",
+                    "shadow-[0_20px_60px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.3)]",
+                    "hover:shadow-[0_25px_80px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]",
+                    "hover:scale-[1.02] transition-all duration-500 ease-out",
+                    "cursor-pointer"
+                  )}
+                  initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.6, delay: index * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+                  viewport={{ once: true }}
+                  onClick={handleOpenBooking}
+                >
+                  {/* Service Image */}
+                  <div className="absolute inset-0 rounded-[28px] overflow-hidden">
+                    <img
+                      src={serviceImages[service.name] || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2074&auto=format&fit=crop'}
+                      alt={service.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-purple-600/10"></div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="absolute inset-0 p-6 flex flex-col justify-end"
+                       style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif' }}>
+                    {/* Price Badge */}
+                    <div className="absolute top-6 right-6">
+                      <span className={cn(
+                        "bg-white/25 dark:bg-black/40 backdrop-blur-[20px] text-white px-3.5 py-2 rounded-[14px]",
+                        "text-[14px] font-semibold border border-white/20",
+                        "shadow-[0_8px_32px_rgba(0,0,0,0.2)]"
+                      )}>
+                        {service.price}
+                      </span>
+                    </div>
+
+                    {/* Service Info */}
+                    <div className="text-white">
+                      <div className="mb-4 text-white/90 opacity-80 group-hover:opacity-100 transition-opacity duration-300">
+                        {service.icon}
+                      </div>
+
+                      <h4 className="text-xl lg:text-2xl font-bold mb-3 group-hover:text-blue-300 transition-colors duration-500">
+                        {service.name}
+                      </h4>
+
+                      <p className="text-white/85 text-[15px] leading-relaxed mb-5 font-medium">
+                        {service.description}
+                      </p>
+
+                      <motion.div
+                        className={cn(
+                          "flex items-center text-[13px] font-semibold text-white/70",
+                          "group-hover:text-white transition-colors duration-300",
+                          "bg-white/10 backdrop-blur-sm px-3 py-2 rounded-[10px] w-fit",
+                          "border border-white/20"
+                        )}
+                        whileHover={{ x: 3, scale: 1.05 }}
+                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                      >
+                        <span>Book now</span>
+                        <div className="ml-2 w-3 h-3">
+                          <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                          </svg>
+                        </div>
+                      </motion.div>
+                    </div>
+                  </div>
+
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-600/10 via-transparent to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[28px]"></div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -309,8 +481,8 @@ export default function HomePage({ employees }: HomePageProps) {
       <TeamSection employees={employees} />
 
       {/* Testimonials Section */}
-            <section id="testimonials" className="py-20 bg-gray-100 dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4">
+      <section id="testimonials" className="py-24 lg:py-32 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-6 lg:px-8">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
@@ -318,8 +490,8 @@ export default function HomePage({ employees }: HomePageProps) {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-4xl md:text-5xl font-bold mb-4 font-serif text-gray-900 dark:text-white">What Our Clients Say</h3>
-            <p className="text-xl text-gray-600 dark:text-gray-400">Real reviews from satisfied customers</p>
+            <h3 className="text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight">Client Reviews</h3>
+            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">Hear what our valued clients have to say about their experience</p>
           </motion.div>
 
           <div className="relative flex w-full flex-col items-center justify-center overflow-hidden py-8">
@@ -344,17 +516,17 @@ export default function HomePage({ employees }: HomePageProps) {
       </section>
 
       {/* Contact Section */}
-            <section id="contact" className="py-20 bg-white dark:bg-gray-900">
-        <div className="max-w-6xl mx-auto px-4">
+            <section id="contact" className="py-24 lg:py-32 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-6 lg:px-8">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-20"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-4xl md:text-5xl font-bold mb-4 font-serif text-gray-900 dark:text-white">Visit Us Today</h3>
-            <p className="text-xl text-gray-600 dark:text-gray-400">We're here to make you look and feel your best</p>
+            <h3 className="text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight">Visit Us Today</h3>
+            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">We're here to make you look and feel your best</p>
           </motion.div>
 
           <div className="grid lg:grid-cols-2 gap-12">
@@ -439,8 +611,8 @@ export default function HomePage({ employees }: HomePageProps) {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-200 dark:bg-gray-950 text-center py-8">
-        <div className="max-w-6xl mx-auto px-4">
+      <footer className="bg-gray-50 dark:bg-gray-900 text-center py-8">
+        <div className="container mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img src="/img/logo.svg" alt="Trimly Logo" className="h-8 w-8" />
             <span className="text-xl font-bold text-primary font-serif">Trimly Cutz</span>
@@ -453,25 +625,32 @@ export default function HomePage({ employees }: HomePageProps) {
       <AnimatePresence>
         {!showBooking && (
           <motion.button
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            exit={{ scale: 0, rotate: 180 }}
+            initial={{ scale: 0, rotate: -180, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            exit={{ scale: 0, rotate: 180, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="fixed bottom-4 right-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 z-30 lg:hidden hover:bg-primary/90"
+            className={cn(
+              "fixed bottom-6 right-6 w-16 h-16 rounded-[20px] z-30 lg:hidden",
+              "bg-gradient-to-b from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500",
+              "shadow-lg dark:shadow-xl",
+              "hover:scale-110 active:scale-95 transition-all duration-300",
+              "border border-blue-400/20 dark:border-blue-300/20",
+              "backdrop-blur-sm flex items-center justify-center"
+            )}
             onClick={handleOpenBooking}
             aria-label="Book appointment"
           >
-            <Scissors className="text-gray-900" size={24} />
+            <Scissors className="text-white" size={24} strokeWidth={2.5} />
           </motion.button>
         )}
       </AnimatePresence>
 
       {/* Floating Theme Toggle / Scroll to Top for Desktop */}
       <motion.div
-        initial={{ scale: 0, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
+        initial={{ scale: 0, rotate: -180, opacity: 0 }}
+        animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.2 }}
-        className="fixed bottom-4 right-4 lg:bottom-6 lg:right-6 z-30 hidden lg:block"
+        className="fixed bottom-6 right-6 z-30 hidden lg:block"
       >
         {isAtBottom ? (
           <motion.button
@@ -481,15 +660,30 @@ export default function HomePage({ employees }: HomePageProps) {
             exit={{ scale: 0, rotate: -180 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             onClick={scrollToTop}
-            className="w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-primary/20 flex items-center justify-center hover:bg-primary/90"
+            className={cn(
+              "w-14 h-14 rounded-[18px] flex items-center justify-center",
+              "bg-white/80 dark:bg-black/70 backdrop-blur-[20px]",
+              "border border-white/30 dark:border-white/20",
+              "shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.3)]",
+              "hover:shadow-[0_16px_50px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_50px_rgba(0,0,0,0.4)]",
+              "hover:scale-110 active:scale-95 transition-all duration-300",
+              "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+            )}
             aria-label="Scroll to top"
           >
-            <ChevronUp size={24} />
+            <ChevronUp size={22} strokeWidth={2.5} />
           </motion.button>
         ) : (
           <AnimatedThemeToggler
             key="theme-toggle"
-            className="w-14 h-14 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 flex items-center justify-center"
+            className={cn(
+              "w-14 h-14 rounded-[18px] flex items-center justify-center",
+              "bg-white/80 dark:bg-black/70 backdrop-blur-[20px]",
+              "border border-white/30 dark:border-white/20",
+              "shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.3)]",
+              "hover:shadow-[0_16px_50px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_16px_50px_rgba(0,0,0,0.4)]",
+              "hover:scale-110 active:scale-95 transition-all duration-300"
+            )}
           />
         )}
       </motion.div>
@@ -501,19 +695,27 @@ export default function HomePage({ employees }: HomePageProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end md:items-center justify-center md:p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-[10px] z-50 flex items-end md:items-center justify-center md:p-4"
             onClick={handleCloseBooking}
           >
             <motion.div
-              initial={{ y: "100%", opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: "100%", opacity: 0 }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="relative bg-white w-full max-h-[90vh] rounded-t-3xl md:rounded-2xl md:max-w-md md:w-full md:max-h-[90vh] md:h-auto overflow-hidden"
+              initial={{ y: "100%", opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: "100%", opacity: 0, scale: 0.95 }}
+              transition={{ type: "tween", duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              className={cn(
+                "relative w-full max-h-[90vh] md:max-w-md md:w-full md:max-h-[90vh] md:h-auto overflow-hidden",
+                "bg-white/95 dark:bg-black/90 backdrop-blur-[40px]",
+                "rounded-t-[32px] md:rounded-[28px]",
+                "border-t border-white/20 md:border md:border-white/30 dark:md:border-white/10",
+                "shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-[0_25px_80px_rgba(0,0,0,0.15)]",
+                "dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] md:dark:shadow-[0_25px_80px_rgba(0,0,0,0.5)]"
+              )}
               onClick={(e) => e.stopPropagation()}
               style={{
                 msOverflowStyle: 'none',
-                scrollbarWidth: 'none'
+                scrollbarWidth: 'none',
+                backdropFilter: 'blur(40px) saturate(180%)'
               }}
             >
               <style jsx>{`
@@ -524,18 +726,6 @@ export default function HomePage({ employees }: HomePageProps) {
               <div className="h-full">
                 <BookingApp employees={employees} onClose={handleCloseBooking} />
               </div>
-              <BorderBeam
-                duration={6}
-                size={400}
-                className="from-transparent via-red-500 to-transparent"
-              />
-              <BorderBeam
-                duration={6}
-                delay={3}
-                size={400}
-                borderWidth={2}
-                className="from-transparent via-blue-500 to-transparent"
-              />
             </motion.div>
           </motion.div>
         )}

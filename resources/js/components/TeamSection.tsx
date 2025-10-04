@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Barber } from '@/types/booking';
 
 interface TeamSectionProps {
@@ -7,60 +8,56 @@ interface TeamSectionProps {
 
 export default function TeamSection({ employees }: TeamSectionProps) {
     return (
-        <section id="team" className="bg-gray-50 py-16 md:py-32 dark:bg-gray-900">
-            <div className="mx-auto max-w-5xl border-t px-6 border-gray-200 dark:border-gray-700">
-                <span className="text-caption -ml-6 -mt-3.5 block w-max bg-gray-50 px-6 dark:bg-gray-900 text-gray-600 dark:text-gray-400">Team</span>
-                <div className="mt-12 gap-4 sm:grid sm:grid-cols-2 md:mt-24">
-                    <div className="sm:w-2/5">
-                        <h2 className="text-3xl font-bold sm:text-4xl text-gray-900 dark:text-white font-serif">Our Master Barbers</h2>
-                    </div>
-                    <div className="mt-6 sm:mt-0">
-                        <p className="text-gray-600 dark:text-gray-400">Each member of our team brings years of experience and passion for the craft. We believe in precision, style, and creating the perfect look for every client who walks through our doors.</p>
-                    </div>
-                </div>
-                <div className="mt-12 md:mt-24">
-                    <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                        {employees.map((employee, index) => (
-                            <div
-                                key={employee.id}
-                                className="group overflow-hidden">
+        <section id="team" className="py-20 bg-gray-50 dark:bg-gray-900">
+            <div className="max-w-6xl mx-auto px-4">
+                <motion.div
+                    className="text-center mb-16"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    viewport={{ once: true }}
+                >
+                    <h3 className="text-4xl md:text-5xl font-bold mb-4 font-serif text-gray-900 dark:text-white">Meet Our Masters</h3>
+                    <p className="text-xl text-gray-600 dark:text-gray-400">Skilled artisans dedicated to your perfect look</p>
+                </motion.div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {employees.map((employee, index) => (
+                        <motion.div
+                            key={employee.id}
+                            className="bg-gray-50 dark:bg-gray-700 rounded-xl overflow-hidden hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-300 transform hover:scale-105"
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                            viewport={{ once: true }}
+                        >
+                            <div className="aspect-square bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center overflow-hidden">
                                 {employee.avatar ? (
                                     <img
-                                        className="h-96 w-full rounded-md object-cover object-top grayscale transition-all duration-500 hover:grayscale-0 group-hover:h-[22.5rem] group-hover:rounded-xl"
                                         src={employee.avatar}
-                                        alt={employee.user?.name || 'Master Barber'}
-                                        width="826"
-                                        height="1239"
+                                        alt={employee.user?.name || 'Barber'}
+                                        className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="h-96 w-full rounded-md bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center grayscale transition-all duration-500 hover:grayscale-0 group-hover:h-[22.5rem] group-hover:rounded-xl">
-                                        <div className="text-white text-6xl font-bold">
+                                    <div className="w-full h-full bg-primary flex items-center justify-center">
+                                        <div className="text-white text-4xl font-bold">
                                             {employee.user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'MB'}
                                         </div>
                                     </div>
                                 )}
-                                <div className="px-2 pt-2 sm:pb-0 sm:pt-4">
-                                    <div className="flex justify-between">
-                                        <h3 className="text-base font-medium transition-all duration-500 group-hover:tracking-wider text-gray-900 dark:text-white">
-                                            {employee.user?.name || 'Master Barber'}
-                                        </h3>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">_0{index + 1}</span>
-                                    </div>
-                                    <div className="mt-1 flex items-center justify-between">
-                                        <span className="text-gray-600 dark:text-gray-400 inline-block translate-y-6 text-sm opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                                            {employee.services && employee.services.length > 0
-                                                ? employee.services.slice(0, 2).map(s => s.name).join(', ')
-                                                : 'Hair & Beard Specialist'
-                                            }
-                                        </span>
-                                        <span className="text-primary inline-block translate-y-8 text-sm tracking-wide opacity-0 transition-all duration-500 hover:underline group-hover:translate-y-0 group-hover:opacity-100">
-                                            Specialist
-                                        </span>
-                                    </div>
-                                </div>
                             </div>
-                        ))}
-                    </div>
+                            <div className="p-6">
+                                <h4 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{employee.user?.name || 'Master Barber'}</h4>
+                                <p className="text-primary mb-3">
+                                    {employee.services && employee.services.length > 0
+                                        ? employee.services.slice(0, 2).map(s => s.name).join(', ')
+                                        : 'Hair & Beard Specialist'
+                                    }
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400 text-sm">Specializing in precision cuts and classic styling techniques</p>
+                            </div>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
         </section>
