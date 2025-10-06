@@ -102,7 +102,7 @@ export default function BookingConfirmation({
                 </div>
               ) : (
                 <img
-                  src={barber?.image || "/placeholder.svg"}
+                  src={barber?.avatar || "/placeholder.svg"}
                   alt={barber?.name || "Barber"}
                   className="w-12 h-12 rounded-full object-cover border border-border"
                 />

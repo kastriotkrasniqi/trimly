@@ -234,20 +234,20 @@ export default function HomePage({ employees }: HomePageProps) {
 
       {/* Hero Section - iOS 17+ Inspired */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900">
-        {/* Background Image */}
+        {/* Background Image - no brightness filter in light mode */}
         <motion.div
           className="absolute inset-0"
           style={{ scale: imageScale, y: imageY }}
         >
+          {/* Show image with no overlay/filter in light mode, keep accent overlay only in dark mode */}
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100"
             style={{
               backgroundImage: "url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2074&auto=format&fit=crop')"
             }}
           />
-          {/* Enhanced overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/20 dark:from-black/60 dark:via-black/40 dark:to-black/20"></div>
-          <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/40 via-transparent to-purple-50/40 dark:from-blue-950/40 dark:via-transparent dark:to-purple-950/40"></div>
+          {/* Accent overlay only in dark mode for style */}
+          <div className="hidden dark:block absolute inset-0 bg-gradient-to-tr from-blue-950/40 via-transparent to-purple-950/40 pointer-events-none"></div>
         </motion.div>
 
         {/* Content Container */}
@@ -263,18 +263,18 @@ export default function HomePage({ employees }: HomePageProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
             >
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8"
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 text-white dark:text-white"
                   style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif' }}>
-                <span className="block text-gray-900 dark:text-white">
-                  <AnimatedText text="Craft premium" className="text-gray-900 dark:text-white" delay={0.2} />
+                <span className="block text-white dark:text-white">
+                  <AnimatedText text="Craft premium" className="text-white dark:text-white" delay={0.2} />
                 </span>
-                <span className="block text-gray-600 dark:text-gray-300 italic font-light">
-                  <AnimatedText text="barbering experiences" className="text-gray-600 dark:text-gray-300 italic font-light" delay={0.6} />
+                <span className="block text-blue-100 dark:text-blue-200 italic font-light">
+                  <AnimatedText text="barbering experiences" className="text-blue-100 dark:text-blue-200 italic font-light" delay={0.6} />
                 </span>
               </h1>
 
               <motion.p
-                className="text-lg md:text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed mb-12"
+                className="text-lg md:text-xl text-gray-100 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed mb-12"
                 style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -337,11 +337,11 @@ export default function HomePage({ employees }: HomePageProps) {
                   onClick={handleOpenBooking}
                   className={cn(
                     "group relative overflow-hidden",
-                    "bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white",
-                    "text-white dark:text-black px-8 py-4 rounded-[22px] font-semibold text-[17px]",
+                    "bg-white text-gray-900 dark:bg-gradient-to-b dark:from-white dark:via-gray-100 dark:to-white dark:text-black",
+                    "px-8 py-4 rounded-[22px] font-semibold text-[17px]",
                     "shadow-lg dark:shadow-xl",
                     "hover:scale-105 active:scale-95 transition-all duration-300",
-                    "border border-gray-700/20 dark:border-gray-300/20",
+                    "border border-gray-200 dark:border-gray-300/20",
                     "flex items-center gap-3"
                   )}
                   style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif' }}
@@ -352,7 +352,7 @@ export default function HomePage({ employees }: HomePageProps) {
                     whileHover={{ x: 3 }}
                     transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                   >
-                    <Scissors className="w-4 h-4" strokeWidth={2.5} />
+                    <Scissors className="w-4 h-4 text-gray-900 dark:text-black" strokeWidth={2.5} />
                   </motion.div>
                 </button>
               </motion.div>
@@ -610,14 +610,29 @@ export default function HomePage({ employees }: HomePageProps) {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-50 dark:bg-gray-900 text-center py-8">
-        <div className="container mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/img/logo.svg" alt="Trimly Logo" className="h-8 w-8" />
-            <span className="text-xl font-bold text-primary font-serif">Trimly Cutz</span>
+      {/* Footer - Professional Layout */}
+      <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-10 pb-6">
+        <div className="container mx-auto px-6 lg:px-8 flex flex-col items-center">
+          <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-2xl mb-6 gap-4">
+            <div className="flex items-center gap-3">
+              <img src="/img/logo.svg" alt="Trimly Logo" className="h-10 w-10 rounded-full shadow-sm" />
+              <span className="text-2xl font-bold text-primary font-serif tracking-tight">Trimly Cutz</span>
+            </div>
+            <div className="flex gap-4 mt-2 md:mt-0">
+              {/* Social icons - add your links */}
+              <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram" className="hover:text-primary transition-colors">
+                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="text-gray-500 dark:text-gray-400 hover:text-primary"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg>
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook" className="hover:text-primary transition-colors">
+                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="text-gray-500 dark:text-gray-400 hover:text-primary"><path d="M18 2h-3a4 4 0 0 0-4 4v3H7v4h4v8h4v-8h3l1-4h-4V6a1 1 0 0 1 1-1h3z"/></svg>
+              </a>
+              <a href="mailto:info@trimlycutz.com" aria-label="Email" className="hover:text-primary transition-colors">
+                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="text-gray-500 dark:text-gray-400 hover:text-primary"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
+              </a>
+            </div>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">© 2025 Trimly Cutz. All rights reserved.</p>
+          <div className="w-full max-w-2xl border-t border-gray-200 dark:border-gray-800 mb-4"></div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">© 2025 Trimly Cutz. All rights reserved.</p>
         </div>
       </footer>
 
