@@ -37,9 +37,22 @@ class SlotController extends Controller
 
         // If booking for today, start from current time to prevent past slots
         if (Carbon::parse($date)->isToday()) {
-            $currentTime = Carbon::now()->format('H:i');
-            if ($currentTime > $dayStart) {
-                $dayStart = $currentTime;
+            $currentTime = Carbon::now();
+
+            // Round up to the next 5-minute interval
+            $minutes = $currentTime->minute;
+            $roundedMinutes = ceil($minutes / 5) * 5;
+
+            if ($roundedMinutes >= 60) {
+                $currentTime = $currentTime->addHour()->minute(0);
+            } else {
+                $currentTime = $currentTime->minute($roundedMinutes);
+            }
+
+            $roundedCurrentTime = $currentTime->format('H:i');
+
+            if ($roundedCurrentTime > $dayStart) {
+                $dayStart = $roundedCurrentTime;
             }
         }
 
@@ -71,6 +84,7 @@ class SlotController extends Controller
             ->with('periods')
             ->first();
 
+
         if (!$schedule || $schedule->periods->isEmpty()) {
             return null; // No availability for this day
         }
@@ -83,6 +97,8 @@ class SlotController extends Controller
             'start' => $period->start_time,
             'end' => $period->end_time
         ];
+
+
     }
 
 }

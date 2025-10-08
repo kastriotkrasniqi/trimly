@@ -67,6 +67,7 @@ export default function TimeBooking({
             .then(res => res.json())
             .then(data => {
                 setTimeSlots(Object.values(data.available_slots) ? Object.values(data.available_slots) : [])
+                console.log('Fetched time slots:', data.available_slots);
             })
             .catch(() => setTimeSlots([]))
             .finally(() => setLoading(false))
@@ -161,7 +162,7 @@ export default function TimeBooking({
                                     variant={selectedTime === slot.start_time ? "default" : "outline"}
                                     className={`h-12 rounded-2xl text-md  ${selectedTime === slot.start_time
                                         ? "bg-primary text-primary-foreground"
-                                        : "text-secondary border-border hover:bg-secondary/80 hover:text-white"
+                                        : "text-foreground border-input bg-background hover:bg-accent hover:text-accent-foreground"
                                     }`}
                                     onClick={() => handleTimeSelect(slot.start_time || "")}
                                 >

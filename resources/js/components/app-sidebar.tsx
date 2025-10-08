@@ -5,13 +5,14 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, CalendarClock, Folder, LayoutGrid, Scissors, User, UserRoundCheck, Users, Users2, Users2Icon } from 'lucide-react';
+import { BookOpen, CalendarClock, CalendarIcon, Folder, LayoutGrid, Scissors, User, UserRoundCheck, Users, Users2, Users2Icon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { index as employeeIndex } from '@/actions/App/Http/Controllers/EmployeeController'
 import { index as scheduleIndex } from '@/actions/App/Http/Controllers/ScheduleController'
 import { index as appointmentIndex } from '@/actions/App/Http/Controllers/AppointmentController'
 import { index as serviceIndex } from '@/actions/App/Http/Controllers/ServiceController'
 import { index as clientIndex } from '@/actions/App/Http/Controllers/ClientController'
+import {index as calendarIndex} from '@/actions/App/Http/Controllers/CalendarController'
 
 export function AppSidebar() {
     const { auth } = usePage().props as any;
@@ -25,6 +26,11 @@ export function AppSidebar() {
             title: 'Dashboard',
             href: dashboard(),
             icon: LayoutGrid,
+        },
+        {
+            title: 'Calendar',
+            href: calendarIndex.url(),
+            icon: CalendarIcon,
         },
         {
             title: 'Schedules',
