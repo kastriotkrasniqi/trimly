@@ -44,6 +44,7 @@ class PermissionSeeder extends Seeder
             'view schedule',
             'edit schedule',
             'delete schedule',
+            'view calendar'
         ];
 
         foreach ($permissions as $permission) {

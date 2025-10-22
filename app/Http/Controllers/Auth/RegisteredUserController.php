@@ -34,6 +34,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'nullable|string|in:client,employee,admin',
         ]);
 
         $user = User::create([
@@ -41,6 +42,13 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Assign default 'client' role if no role is specified
+        if (!$request->has('role') || empty($request->role)) {
+            $user->assignRole('client');
+        } else {
+            $user->assignRole($request->role);
+        }
 
         event(new Registered($user));
 

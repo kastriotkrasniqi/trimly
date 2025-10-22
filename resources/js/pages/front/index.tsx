@@ -6,7 +6,7 @@ import {
   ScrollVelocityRow,
 } from '@/components/ui/scroll-based-velocity';
 import { cn } from '@/lib/utils';
-import BookingApp from '@/pages/mobile-appointment';
+import BookingApp from '@/pages/appointment';
 import { Barber } from '@/types/booking';
 import { Head } from '@inertiajs/react';
 import { AnimatedThemeToggler } from '@/components/ui/animated-theme-toggler';

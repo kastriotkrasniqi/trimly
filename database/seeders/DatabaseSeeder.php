@@ -17,21 +17,21 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             PermissionSeeder::class,
-            EmployeeSeeder::class,
-            ClientSeeder::class,
-            ServiceSeeder::class,
-            EmployeeServiceSeeder::class,
-            ScheduleSeeder::class,
+            // EmployeeSeeder::class,
+            // ClientSeeder::class,
+            // ServiceSeeder::class,
+            // EmployeeServiceSeeder::class,
+            // ScheduleSeeder::class,
             // AppointmentSeeder::class,
         ]);
 
-        $user = User::factory()->create([
-            'name' => 'Kastriot',
-            'email' => 'krasniqikastriot01@gmail.com',
-            'password' => bcrypt('password'),
-        ]);
+        // $user = User::factory()->create([
+        //     'name' => 'Kastriot',
+        //     'email' => 'krasniqikastriot01@gmail.com',
+        //     'password' => bcrypt('password'),
+        // ]);
 
-        $user->assignRole('admin');
+        // $user->assignRole('admin');
 
     }
 }
