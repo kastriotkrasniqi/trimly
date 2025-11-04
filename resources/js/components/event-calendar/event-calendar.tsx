@@ -65,6 +65,9 @@ export function EventCalendar({
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
 
+  // Check if editing is allowed (when handlers are provided)
+  const canEdit = !!(onEventAdd || onEventUpdate || onEventDelete);
+
   // Add keyboard shortcuts for view switching
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -135,10 +138,14 @@ export function EventCalendar({
   const handleEventSelect = (event: CalendarEvent) => {
     console.log("Event selected:", event) // Debug log
     setSelectedEvent(event)
+    // Only open dialog for editing if user can edit, otherwise just view
     setIsEventDialogOpen(true)
   }
 
   const handleEventCreate = (startTime: Date) => {
+    // Only allow event creation if user can edit
+    if (!canEdit) return;
+
     console.log("Creating new event at:", startTime) // Debug log
 
     // Snap to 15-minute intervals
@@ -401,6 +408,7 @@ export function EventCalendar({
           }}
           onSave={handleEventSave}
           onDelete={handleEventDelete}
+          readOnly={!canEdit}
         />
       </CalendarDndProvider>
     </div>

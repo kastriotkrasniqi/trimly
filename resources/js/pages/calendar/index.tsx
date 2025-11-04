@@ -1,6 +1,6 @@
 import { CalendarComponent } from '@/components/comp-542'
 import AppLayout from '@/layouts/app-layout'
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { index as calendarIndex } from '@/actions/App/Http/Controllers/CalendarController'
 import { useState } from "react"
 import { type BreadcrumbItem } from '@/types';
@@ -30,6 +30,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function CalendarPage({ appointments: initialAppointments, employees }: CalendarPageProps) {
+    const { props } = usePage()
+    const user = props.auth?.user || null
+
     // Convert date strings to Date objects
     const processedAppointments = (initialAppointments || []).map(appointment => ({
         ...appointment,
@@ -41,23 +44,34 @@ export default function CalendarPage({ appointments: initialAppointments, employ
 
     const [events, setEvents] = useState<CalendarEvent[]>(processedAppointments)
 
+    // Check if user can edit appointments (admin or employee only)
+    const canEditAppointments = user && (
+        user.roles?.some((role: any) => role.name === 'admin' || role.name === 'employee')
+    );
+
     const handleEventAdd = (event: CalendarEvent) => {
         // TODO: Add API call to create appointment
-        setEvents([...events, event])
+        if (canEditAppointments) {
+            setEvents([...events, event])
+        }
     }
 
     const handleEventUpdate = (updatedEvent: CalendarEvent) => {
         // TODO: Add API call to update appointment
-        setEvents(
-            events.map((event) =>
-                event.id === updatedEvent.id ? updatedEvent : event
+        if (canEditAppointments) {
+            setEvents(
+                events.map((event) =>
+                    event.id === updatedEvent.id ? updatedEvent : event
+                )
             )
-        )
+        }
     }
 
     const handleEventDelete = (eventId: string) => {
         // TODO: Add API call to delete appointment
-        setEvents(events.filter((event) => event.id !== eventId))
+        if (canEditAppointments) {
+            setEvents(events.filter((event) => event.id !== eventId))
+        }
     }
 
     return (
@@ -66,9 +80,10 @@ export default function CalendarPage({ appointments: initialAppointments, employ
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <EventCalendar
                     events={events}
-                    onEventAdd={handleEventAdd}
-                    onEventUpdate={handleEventUpdate}
-                    onEventDelete={handleEventDelete}
+                    // Only pass edit handlers if user can edit appointments
+                    onEventAdd={canEditAppointments ? handleEventAdd : undefined}
+                    onEventUpdate={canEditAppointments ? handleEventUpdate : undefined}
+                    onEventDelete={canEditAppointments ? handleEventDelete : undefined}
                 />
             </div>
         </AppLayout>

@@ -47,6 +47,7 @@ interface EventDialogProps {
   onClose: () => void
   onSave: (event: CalendarEvent) => void
   onDelete: (eventId: string) => void
+  readOnly?: boolean
 }
 
 export function EventDialog({
@@ -55,6 +56,7 @@ export function EventDialog({
   onClose,
   onSave,
   onDelete,
+  readOnly = false,
 }: EventDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -291,6 +293,7 @@ export function EventDialog({
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              disabled={readOnly}
             />
           </div>
 
@@ -301,6 +304,7 @@ export function EventDialog({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
+              disabled={readOnly}
             />
           </div>
 
@@ -312,6 +316,7 @@ export function EventDialog({
                   <Button
                     id="start-date"
                     variant={"outline"}
+                    disabled={readOnly}
                     className={cn(
                       "group bg-background hover:bg-background border-input w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]",
                       !startDate && "text-muted-foreground"
@@ -362,6 +367,7 @@ export function EventDialog({
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   className="w-full"
+                  disabled={readOnly}
                 />
               </div>
             )}
@@ -375,6 +381,7 @@ export function EventDialog({
                   <Button
                     id="end-date"
                     variant={"outline"}
+                    disabled={readOnly}
                     className={cn(
                       "group bg-background hover:bg-background border-input w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]",
                       !endDate && "text-muted-foreground"
@@ -422,6 +429,7 @@ export function EventDialog({
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   className="w-full"
+                  disabled={readOnly}
                 />
               </div>
             )}
@@ -432,6 +440,7 @@ export function EventDialog({
               id="all-day"
               checked={allDay}
               onCheckedChange={(checked) => setAllDay(checked === true)}
+              disabled={readOnly}
             />
             <Label htmlFor="all-day">All day</Label>
           </div>
@@ -442,6 +451,7 @@ export function EventDialog({
               id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              disabled={readOnly}
             />
           </div>
           <fieldset className="space-y-4">
@@ -453,6 +463,7 @@ export function EventDialog({
               defaultValue={colorOptions[0]?.value}
               value={color}
               onValueChange={(value: EventColor) => setColor(value)}
+              disabled={readOnly}
             >
               {colorOptions.map((colorOption) => (
                 <RadioGroupItem
@@ -471,7 +482,7 @@ export function EventDialog({
           </fieldset>
         </div>
         <DialogFooter className="flex-row sm:justify-between">
-          {event?.id && (
+          {!readOnly && event?.id && (
             <Button
               variant="outline"
               size="icon"
@@ -483,9 +494,11 @@ export function EventDialog({
           )}
           <div className="flex flex-1 justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              {readOnly ? 'Close' : 'Cancel'}
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            {!readOnly && (
+              <Button onClick={handleSave}>Save</Button>
+            )}
           </div>
         </DialogFooter>
       </DialogContent>
