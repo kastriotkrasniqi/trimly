@@ -77,6 +77,10 @@ class PermissionSeeder extends Seeder
             'edit appointments',
             'create appointments',
             'view dashboard',
+            'create schedule',
+            'view schedule',
+            'edit schedule',
+            'view calendar',
         ];
 
 
@@ -96,6 +100,7 @@ class PermissionSeeder extends Seeder
             'view appointments',
             'create appointments',
             'view dashboard',
+            'view calendar',
         ];
 
         foreach ($clientPermissions as $permission) {

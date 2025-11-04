@@ -18,6 +18,13 @@ class AppointmentController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+
+        // Check if user has permission to view appointments
+        if (!$user->hasPermissionTo('view appointments')) {
+            abort(403, 'Access denied. You do not have permission to view appointments.');
+        }
+
         return Inertia::render('appointments/index');
     }
 

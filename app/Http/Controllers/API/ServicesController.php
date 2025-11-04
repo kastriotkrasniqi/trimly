@@ -22,7 +22,7 @@ class ServicesController extends Controller
         if ($user->hasRole('admin') || $user->hasPermissionTo('view all services')) {
             // Admin can see all services
             $query = Service::with('employees.user');
-        } else {
+        } elseif ($user->hasRole('employee') && $user->hasPermissionTo('view services')) {
             // Employee can only see their own services
             $employee = $user->employee;
 
@@ -30,7 +30,9 @@ class ServicesController extends Controller
                 return response()->json(['message' => 'Employee profile not found'], 403);
             }
 
-            $query = $employee->services();
+            $query = $employee->services()->with('employees.user');
+        } else {
+            return response()->json(['message' => 'Access denied. You do not have permission to view services.'], 403);
         }
 
         $search = $request->input('search');

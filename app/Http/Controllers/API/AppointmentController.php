@@ -25,7 +25,7 @@ class AppointmentController extends Controller
         if ($user->hasRole('admin') || $user->hasPermissionTo('view all appointments')) {
             // Admin can see all appointments from all employees
             $query = Schedule::appointments()->with(['periods', 'schedulable.user']);
-        } elseif ($user->hasRole('client') || $user->hasPermissionTo('view appointments')) {
+        } elseif ($user->hasRole('employee') && $user->hasPermissionTo('view appointments')) {
             // Employee can only see their own appointments
             $employee = $user->employee;
 
@@ -34,12 +34,15 @@ class AppointmentController extends Controller
             }
 
             $query = $employee->appointmentSchedules()->with(['periods', 'schedulable.user']);
-        } else {
+        } elseif ($user->hasRole('client') && $user->hasPermissionTo('view appointments')) {
+            // Client can only see their own appointments
             $client = $user->client;
             if (!$client) {
                 return response()->json(['message' => 'Client profile not found'], 403);
             }
             $query = Schedule::appointments()->where('metadata->client->id', $client->id)->with(['periods', 'schedulable.user']);
+        } else {
+            return response()->json(['message' => 'Access denied. You do not have permission to view appointments.'], 403);
         }
 
         $search = request('search');

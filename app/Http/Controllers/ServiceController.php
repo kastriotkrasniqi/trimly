@@ -15,6 +15,13 @@ class ServiceController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
+
+        // Check if user has permission to view services
+        if (!$user->hasPermissionTo('view services')) {
+            abort(403, 'Access denied. You do not have permission to view services.');
+        }
+
         return Inertia::render('services/index');
     }
 

@@ -1,16 +1,15 @@
 <?php
 
-use App\Http\Controllers\CalendarController;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\SlotController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SlotController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -33,7 +32,6 @@ Route::get('/available-slots/{employee}', [SlotController::class, 'getAvailableS
 Route::post('/appointments/book-appointment', [AppointmentController::class, 'store']);
 Route::get('/my-appointments', [AppointmentController::class, 'index'])->name('my-appointments');
 
-
 Route::group(['middleware' => ['permission:view employees']], function () {
     Route::resource('employees', EmployeeController::class)->only(['index', 'store', 'update']);
     Route::post('/delete-employees', [EmployeeController::class, 'destroy'])->name('employees.destroy')->middleware(['permission:delete employees']);
@@ -44,10 +42,7 @@ Route::group(['middleware' => ['permission:view clients']], function () {
     Route::post('/delete-clients', [ClientController::class, 'destroy'])->name('clients.destroy')->middleware(['permission:delete clients']);
 });
 
-Route::get('/calendar',[CalendarController::class,'index'])->name('calendar')->middleware('auth')->middleware('permission:view calendar');
+Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar')->middleware('auth')->middleware('permission:view calendar');
 
-
-
-
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

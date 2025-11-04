@@ -15,8 +15,15 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+
+        // Check if user has permission to view dashboard
+        if (!$user->hasPermissionTo('view dashboard')) {
+            abort(403, 'Access denied. You do not have permission to view the dashboard.');
+        }
+
         $isAdmin = $user->hasRole('admin');
         $isEmployee = $user->hasRole('employee');
+        $isClient = $user->hasRole('client');
 
         // Role-based data filtering
         if ($isAdmin) {
@@ -30,7 +37,7 @@ class DashboardController extends Controller
 
             // All appointments for admin
             $appointmentQuery = Schedule::where('name', 'Appointment');
-        } else {
+        } elseif ($isEmployee) {
             // Employee sees only their own data
             $employee = $user->employee;
 
@@ -60,6 +67,37 @@ class DashboardController extends Controller
                     ->where('schedulable_type', Employee::class)
                     ->where('schedulable_id', $employee->id);
             }
+        } elseif ($isClient) {
+            // Client sees only their own appointment data
+            $client = $user->client;
+
+            if (!$client) {
+                // If user is not properly set up as client, show minimal data
+                $totalClients = 1; // themselves
+                $totalEmployees = 0; // don't show employee counts to clients
+                $totalServices = 0; // don't show service counts to clients
+                $totalUsers = 1;
+                $totalAppointments = 0;
+                $activeEmployees = 0;
+                $appointmentQuery = Schedule::where('name', 'Appointment')->where('metadata->client->id', -1); // No results
+            } else {
+                // Client-specific counts
+                $totalClients = 1; // Only themselves
+                $totalEmployees = 0; // Don't show employee counts
+                $totalServices = 0; // Don't show service counts
+                $totalUsers = 1;
+                $totalAppointments = Schedule::where('name', 'Appointment')
+                    ->where('metadata->client->id', $client->id)
+                    ->count();
+                $activeEmployees = 0; // Don't show employee counts
+
+                // Only their appointments
+                $appointmentQuery = Schedule::where('name', 'Appointment')
+                    ->where('metadata->client->id', $client->id);
+            }
+        } else {
+            // User without proper role cannot access dashboard
+            abort(403, 'Access denied. You do not have a valid role to view the dashboard.');
         }
 
         // Today's appointments
@@ -169,7 +207,7 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboard', [
             'stats' => $stats,
-            'userRole' => $isAdmin ? 'admin' : ($isEmployee ? 'employee' : 'client'),
+            'userRole' => $isAdmin ? 'admin' : ($isEmployee ? 'employee' : ($isClient ? 'client' : 'unknown')),
         ]);
     }
 }

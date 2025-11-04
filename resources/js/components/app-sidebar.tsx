@@ -19,6 +19,7 @@ export function AppSidebar() {
     const user = auth?.user;
     const isAdmin = user?.roles?.some((role: any) => role.name === 'admin') || false;
     const isEmployee = user?.roles?.some((role: any) => role.name === 'employee') || false;
+    const isClient = user?.roles?.some((role: any) => role.name === 'client') || false;
 
     // Base navigation items available to all authenticated users
     const baseNavItems: NavItem[] = [
@@ -27,6 +28,10 @@ export function AppSidebar() {
             href: dashboard(),
             icon: LayoutGrid,
         },
+    ];
+
+    // Navigation items for admin users
+    const adminNavItems: NavItem[] = [
         {
             title: 'Calendar',
             href: calendarIndex.url(),
@@ -46,11 +51,7 @@ export function AppSidebar() {
             title: 'Services',
             href: serviceIndex.url(),
             icon: Scissors,
-        }
-    ];
-
-    // Admin-only navigation items
-    const adminNavItems: NavItem[] = [
+        },
         {
             title: 'Employees',
             href: employeeIndex.url(),
@@ -63,11 +64,54 @@ export function AppSidebar() {
         },
     ];
 
-    // Build final navigation items based on user role
-    const mainNavItems: NavItem[] = [
-        ...baseNavItems,
-        ...(isAdmin ? adminNavItems : [])
+    // Navigation items for employee users
+    const employeeNavItems: NavItem[] = [
+        {
+            title: 'Calendar',
+            href: calendarIndex.url(),
+            icon: CalendarIcon,
+        },
+        {
+            title: 'Schedules',
+            href: scheduleIndex.url(),
+            icon: CalendarClock,
+        },
+        {
+            title: 'Appointments',
+            href: appointmentIndex.url(),
+            icon: UserRoundCheck,
+        },
+        {
+            title: 'Services',
+            href: serviceIndex.url(),
+            icon: Scissors,
+        },
     ];
+
+    // Navigation items for client users
+    const clientNavItems: NavItem[] = [
+        {
+            title: 'Calendar',
+            href: calendarIndex.url(),
+            icon: CalendarIcon,
+        },
+        {
+            title: 'Appointments',
+            href: appointmentIndex.url(),
+            icon: UserRoundCheck,
+        },
+    ];
+
+    // Build final navigation items based on user role
+    let mainNavItems: NavItem[] = [...baseNavItems];
+
+    if (isAdmin) {
+        mainNavItems = [...mainNavItems, ...adminNavItems];
+    } else if (isEmployee) {
+        mainNavItems = [...mainNavItems, ...employeeNavItems];
+    } else if (isClient) {
+        mainNavItems = [...mainNavItems, ...clientNavItems];
+    }
     const footerNavItems: NavItem[] = [
         // {
         //     title: 'Repository',

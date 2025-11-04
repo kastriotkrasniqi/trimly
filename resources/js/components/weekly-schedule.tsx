@@ -85,9 +85,10 @@ function convertFrontendToBackend(schedule: WeeklyScheduleData) {
   return { availability, lunch_break: lunchBreak }
 }
 
-export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
+export function WeeklySchedule({ initialSchedules, initialLunchBreak, readOnly = false }: {
   initialSchedules?: any,
-  initialLunchBreak?: any
+  initialLunchBreak?: any,
+  readOnly?: boolean
 }) {
 
 
@@ -238,7 +239,7 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
   );
 
   // Change conditional rendering
-  if (!showForm) {
+  if (!showForm && !readOnly) {
     return (
       <div className="space-y-6 px-2 sm:px-4 md:px-0">
         <Card>
@@ -280,6 +281,7 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
                   value={schedule.lunchBreak.start}
                   onChange={(e) => updateLunchBreak("start", e.target.value)}
                   className="w-32"
+                  disabled={readOnly}
                 />
               </div>
 
@@ -293,6 +295,7 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
                   value={schedule.lunchBreak.end}
                   onChange={(e) => updateLunchBreak("end", e.target.value)}
                   className="w-32"
+                  disabled={readOnly}
                 />
               </div>
             </div>
@@ -311,12 +314,15 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
                     <Switch
                       checked={daySchedule.enabled}
                       onCheckedChange={(checked) => updateDaySchedule(key, "enabled", checked)}
+                      disabled={readOnly}
                     />
                     <Label className="text-base font-medium min-w-[100px]">{label}</Label>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => copyToAll(key)} className="text-xs">
-                    Copy to All
-                  </Button>
+                  {!readOnly && (
+                    <Button variant="outline" size="sm" onClick={() => copyToAll(key)} className="text-xs">
+                      Copy to All
+                    </Button>
+                  )}
                 </div>
 
                 <div className="space-y-3 ml-8">
@@ -330,7 +336,7 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
                         type="time"
                         value={daySchedule.startTime}
                         onChange={(e) => updateDaySchedule(key, "startTime", e.target.value)}
-                        disabled={!daySchedule.enabled}
+                        disabled={!daySchedule.enabled || readOnly}
                         className={`w-32 ${hasTimeError ? "border-destructive" : ""}`}
                       />
                     </div>
@@ -344,7 +350,7 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
                         type="time"
                         value={daySchedule.endTime}
                         onChange={(e) => updateDaySchedule(key, "endTime", e.target.value)}
-                        disabled={!daySchedule.enabled}
+                        disabled={!daySchedule.enabled || readOnly}
                         className={`w-32 ${hasTimeError ? "border-destructive" : ""}`}
                       />
                     </div>
@@ -395,17 +401,19 @@ export function WeeklySchedule({ initialSchedules, initialLunchBreak }: {
         </CardContent>
       </Card>
 
-      <div className="flex flex-col md:flex-row gap-2 md:gap-0 justify-between">
-        <Button variant="outline" onClick={handleReset} className="flex items-center gap-2 bg-transparent">
-          <RotateCcw className="h-4 w-4" />
-          Reset {hasExistingSchedules ? 'to Saved' : 'to Default'}
-        </Button>
+      {!readOnly && (
+        <div className="flex flex-col md:flex-row gap-2 md:gap-0 justify-between">
+          <Button variant="outline" onClick={handleReset} className="flex items-center gap-2 bg-transparent">
+            <RotateCcw className="h-4 w-4" />
+            Reset {hasExistingSchedules ? 'to Saved' : 'to Default'}
+          </Button>
 
-        <Button onClick={handleSubmit} disabled={processing} className="flex items-center gap-2">
-          <Save className="h-4 w-4" />
-          {processing ? 'Saving...' : 'Save Schedule'}
-        </Button>
-      </div>
+          <Button onClick={handleSubmit} disabled={processing} className="flex items-center gap-2">
+            <Save className="h-4 w-4" />
+            {processing ? 'Saving...' : 'Save Schedule'}
+          </Button>
+        </div>
+      )}
 
       {/* Schedule Summary */}
       <Card>
