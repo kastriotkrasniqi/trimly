@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, CalendarClock, CalendarIcon, Folder, LayoutGrid, Scissors, User, UserRoundCheck, Users, Users2, Users2Icon } from 'lucide-react';
+import { BookOpen, CalendarClock, CalendarIcon, Folder, Globe, LayoutGrid, Scissors, User, UserRoundCheck, Users, Users2, Users2Icon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { index as employeeIndex } from '@/actions/App/Http/Controllers/EmployeeController'
 import { index as scheduleIndex } from '@/actions/App/Http/Controllers/ScheduleController'
@@ -113,11 +113,11 @@ export function AppSidebar() {
         mainNavItems = [...mainNavItems, ...clientNavItems];
     }
     const footerNavItems: NavItem[] = [
-        // {
-        //     title: 'Repository',
-        //     href: 'https://github.com/laravel/react-starter-kit',
-        //     icon: Folder,
-        // },
+        {
+            title: 'Website',
+            href: 'http://trimly.test',
+            icon: Globe,
+        },
         // {
         //     title: 'Documentation',
         //     href: 'https://laravel.com/docs/starter-kits#react',

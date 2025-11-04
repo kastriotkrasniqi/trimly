@@ -2,6 +2,7 @@
     import { Menu, X } from 'lucide-react';
     import { motion, AnimatePresence } from 'framer-motion';
     import { cn } from '@/lib/utils';
+    import { usePage } from '@inertiajs/react';
 
     interface AnimatedHeaderProps {
     navOpen: boolean;
@@ -16,6 +17,7 @@
     isDarkMode,
     onOpenBooking
     }) => {
+    const { auth } = usePage().props as any;
     const [isScrolled, setIsScrolled] = useState(false);
 
     const handleToggleNav = useCallback(() => {
@@ -122,6 +124,7 @@
                 style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif' }}
             >
                 {[
+                    ...(auth?.user ? [{ label: 'Dashboard', href: '/dashboard' }] : []),
                     { label: 'Services', href: '#services' },
                     { label: 'Our Team', href: '#team' },
                     { label: 'Reviews', href: '#testimonials' },
