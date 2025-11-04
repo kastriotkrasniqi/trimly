@@ -44,10 +44,22 @@ class RegisteredUserController extends Controller
         ]);
 
         // Assign default 'client' role if no role is specified
-        if (!$request->has('role') || empty($request->role)) {
+        if (! $request->has('role') || empty($request->role)) {
             $user->assignRole('client');
+            // Create client record for users assigned client role
+            \App\Models\Client::create([
+                'user_id' => $user->id,
+                'phone' => null,
+            ]);
         } else {
             $user->assignRole($request->role);
+            // Create client record if the specified role is client
+            if ($request->role === 'client') {
+                \App\Models\Client::create([
+                    'user_id' => $user->id,
+                    'phone' => null,
+                ]);
+            }
         }
 
         event(new Registered($user));

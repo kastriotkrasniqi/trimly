@@ -67,8 +67,6 @@ export default function BookingApp({ employees, onClose }: BookingAppProps) {
     }))
   }, [])
 
-  // Simulate getting the client_id (replace with real auth/user context in production)
-  const clientId = 1;
 
   // POST appointment to backend
   const handleConfirmBooking = useCallback(async () => {
@@ -93,7 +91,7 @@ export default function BookingApp({ employees, onClose }: BookingAppProps) {
 
       const pad = (n: number) => n.toString().padStart(2, "0");
       const payload = {
-        client_id: clientId,
+        client_id: user?.id || null,
         employee_id: bookingData.selectedBarber,
         date: startDate.toISOString().slice(0, 10),
         start_time: `${pad(startDate.getHours())}:${pad(startDate.getMinutes())}`,
@@ -166,7 +164,7 @@ export default function BookingApp({ employees, onClose }: BookingAppProps) {
       setProcessingState("error");
       setBookingError(error instanceof Error ? error.message : "Failed to book appointment. Please try again.");
     }
-  }, [bookingData, employees, clientId, changeStep])
+  }, [bookingData, employees, user?.id, changeStep])
   const handleNewBooking = useCallback(() => {
     setBookingData({
       selectedBarber: "",

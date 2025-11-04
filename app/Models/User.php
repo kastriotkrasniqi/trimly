@@ -12,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +24,7 @@ class User extends Authenticatable
         'phone',
         'email',
         'password',
-        'role'
+        'role',
     ];
 
     /**
@@ -47,14 +47,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => UserRole::class
+            'role' => UserRole::class,
         ];
     }
-
-
 
     public function employee()
     {
         return $this->hasOne(Employee::class);
+    }
+
+    public function client()
+    {
+        return $this->hasOne(Client::class);
     }
 }
